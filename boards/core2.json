@@ -1,0 +1,33 @@
+{
+  "build": {
+    "core": "stm32",
+    "cpu": "cortex-m4",
+    "extra_flags": "-DSTM32F4 -DSTM32F407xx -DSTM32F40_41xxx",
+    "f_cpu": "168000000L",
+    "mcu": "stm32f407zgt6",
+    "product_line": "STM32F407xx",
+    "variant": "BLACK_F407XX"
+  },
+  "connectivity": [
+    "can"
+  ],
+  "debug": {
+    "jlink_device": "STM32F407ZE",
+    "openocd_target": "stm32f4x",
+    "svd_path": "STM32F40x.svd"
+  },
+  "frameworks": [
+    "mbed"
+  ],
+  "name": "CORE2",
+  "upload": {
+    "maximum_ram_size": 196608,
+    "maximum_size": 1048576,
+    "protocol": "stlink",
+    "protocols": [
+      "stlink"
+    ]
+  },
+  "url": "www.husarion.com",
+  "vendor": "Husarion"
+}

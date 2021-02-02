@@ -1,0 +1,24 @@
+[submodule "lib/core2-imu-driver"]
+	path = lib/core2-imu-driver
+	url = https://github.com/byq77/core2-imu-driver.git
+	branch = dev
+
+[submodule "lib/rosserial-mbed"]
+	path = lib/rosserial-mbed
+	url = https://github.com/byq77/rosserial-mbed.git
+	branch = dev
+
+[submodule "lib/drv88xx-driver-mbed"]
+	path = lib/drv88xx-driver-mbed
+	url = https://github.com/byq77/drv88xx-driver-mbed.git
+	branch = master
+
+[submodule "lib/encoder-mbed"]
+	path = lib/encoder-mbed
+	url = https://github.com/byq77/encoder-mbed.git
+	branch = master
+
+[submodule "lib/vl53l0x-mbed"]
+	path = lib/vl53l0x-mbed
+	url = https://github.com/byq77/vl53l0x-mbed.git
+	branch = dev
