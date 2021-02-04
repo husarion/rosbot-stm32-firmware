@@ -324,6 +324,7 @@ void RosbotDrive::resetDistance()
 {
     bool tmp = _regulator_output_enabled;
     _regulator_loop_enabled = false;
+    _regulator_output_enabled =  false;
     FOR(4) _mot[i]->setPower(0);
     FOR(4)
     {
@@ -333,7 +334,8 @@ void RosbotDrive::resetDistance()
         _cspeed_mps[i]=0;
         _cdistance[i]=0;
     }
-    _regulator_loop_enabled = tmp;
+    _regulator_loop_enabled = true;
+    _regulator_output_enabled =  tmp;
 }
 
 void RosbotDrive::setupMotorSequence(RosbotMotNum first, RosbotMotNum second, RosbotMotNum third, RosbotMotNum fourth)
