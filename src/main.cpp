@@ -682,8 +682,8 @@ uint8_t ConfigFunctionality::setKinematics(const char *datain, const char **data
         rk->~RosbotKinematics();
         rk = rosbot_kinematics::RosbotKinematics::kinematicsType(0);
         rk->setOdomParams();
-        // RosbotDrive &drive = RosbotDrive::getInstance();
-        // rk->resetRosbotOdometry(drive, odometry);
+        RosbotDrive &drive = RosbotDrive::getInstance();
+        rk->resetRosbotOdometry(drive, odometry);
     }
     else if (data == "MEC")
     {
@@ -692,7 +692,7 @@ uint8_t ConfigFunctionality::setKinematics(const char *datain, const char **data
         rk = rosbot_kinematics::RosbotKinematics::kinematicsType(1);
         rk->setOdomParams();
         RosbotDrive &drive = RosbotDrive::getInstance();
-        // rk->resetRosbotOdometry(drive, odometry);
+        rk->resetRosbotOdometry(drive, odometry);
     }
     else
     {
@@ -1003,12 +1003,12 @@ int main()
 
         if (spin_count % 5 == 0) /// cmd_vel, odometry, joint_states, tf messages
         {
-            current_vel.linear.x = sqrt(odometry.odom.robot_x_vel * odometry.odom.robot_x_vel + odometry.odom.robot_y_vel * odometry.odom.robot_y_vel);
-            current_vel.angular.z = odometry.odom.robot_angular_vel;
+            current_vel.linear.x = sqrt(odometry.robot_x_vel * odometry.robot_x_vel + odometry.robot_y_vel * odometry.robot_y_vel);
+            current_vel.angular.z = odometry.robot_angular_vel;
             current_vel = rk->getTwist(odometry);
-            pose.pose.position.x = odometry.odom.robot_x_pos;
-            pose.pose.position.y = odometry.odom.robot_y_pos;
-            pose.pose.orientation = tf::createQuaternionFromYaw(odometry.odom.robot_angular_pos);
+            pose.pose.position.x = odometry.robot_x_pos;
+            pose.pose.position.y = odometry.robot_y_pos;
+            pose.pose.orientation = tf::createQuaternionFromYaw(odometry.robot_angular_pos);
 
             pose.header.stamp = nh.now();
             if (nh.connected())
@@ -1019,10 +1019,10 @@ int main()
 
             if (joint_states_enabled)
             {
-                pos[0] = odometry.odom.wheel_FL_ang_pos;
-                pos[1] = odometry.odom.wheel_FR_ang_pos;
-                pos[2] = odometry.odom.wheel_RL_ang_pos;
-                pos[3] = odometry.odom.wheel_RR_ang_pos;
+                pos[0] = odometry.wheel_FL_ang_pos;
+                pos[1] = odometry.wheel_FR_ang_pos;
+                pos[2] = odometry.wheel_RL_ang_pos;
+                pos[3] = odometry.wheel_RR_ang_pos;
                 joint_states.position = pos;
                 joint_states.header.stamp = pose.header.stamp;
                 if (nh.connected())

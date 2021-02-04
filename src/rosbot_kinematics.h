@@ -14,8 +14,30 @@
 namespace rosbot_kinematics
 {
     extern RosbotWheel custom_wheel_params;
-    struct Odometry
+    struct RosbotOdometry
     {
+        void reset()
+        {
+            wheel_FR_ang_pos = 0.0f;
+            wheel_FL_ang_pos = 0.0f;
+            wheel_RR_ang_pos = 0.0f;
+            wheel_RL_ang_pos = 0.0f;
+            wheel_L_ang_pos = 0.0f;
+            wheel_R_ang_pos = 0.0f;
+            wheel_L_ang_vel = 0.0f;
+            wheel_R_ang_vel = 0.0f;
+            wheel_FR_ang_vel = 0.0f;
+            wheel_FL_ang_vel = 0.0f;
+            wheel_RR_ang_vel = 0.0f;
+            wheel_RL_ang_vel = 0.0f;
+            robot_angular_pos = 0.0f;
+            robot_angular_vel = 0.0f;
+            robot_x_pos = 0.0f;
+            robot_y_pos = 0.0f;
+            robot_x_vel = 0.0f;
+            robot_y_vel = 0.0f;
+        }
+
         float wheel_FR_ang_pos;  // radians
         float wheel_FL_ang_pos;  // radians
         float wheel_RR_ang_pos;  // radians
@@ -34,11 +56,6 @@ namespace rosbot_kinematics
         float robot_y_pos;       // meters
         float robot_x_vel;       // meters per second
         float robot_y_vel;       // meters per second
-    };
-    union RosbotOdometry
-    {
-        Odometry odom;
-        float buffor[14];
     };
 
     class RosbotKinematics

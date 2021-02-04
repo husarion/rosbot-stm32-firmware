@@ -325,9 +325,9 @@ void RosbotDrive::resetDistance()
     bool tmp = _regulator_output_enabled;
     _regulator_loop_enabled = false;
     _regulator_output_enabled =  false;
-    FOR(4) _mot[i]->setPower(0);
     FOR(4)
     {
+        if(_tspeed_mps[i] > 0.0f ) _mot[i]->setPower(0);
         _encoder[i]->resetCount();
         _regulator[i]->reset();
         _tspeed_mps[i]=0;
