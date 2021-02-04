@@ -1,8 +1,8 @@
 /** @file main.cpp
  * ROSbot firmware.
  * 
- * @date 02-02-2021
- * @version 0.14.3
+ * @date 18-12-2020
+ * @version 0.14.2
  * @copyright GNU GPL-3.0
  */
 #include <rosbot_kinematics.h>
@@ -59,15 +59,14 @@ static int parseColorStr(const char *color_str, Color_t *color_ptr)
 #define IMU_I2C_SDA SENS2_PIN4
 
 extern Mail<ImuDriver::ImuMesurement, 10> imu_sensor_mail_box;
-const char * imu_sensor_type_string[] = {
+const char *imu_sensor_type_string[] = {
     "BNO055_ADDR_A",
     "BNO055_ADDR_B",
     "MPU9250",
     "MPU9255",
-    "UNKNOWN"
-};
+    "UNKNOWN"};
 char imu_description_string[64] = "";
-ImuDriver * imu_driver_ptr;
+ImuDriver *imu_driver_ptr;
 
 geometry_msgs::Twist current_vel;
 sensor_msgs::JointState joint_states;
@@ -231,7 +230,7 @@ static void initJointStatePublisher()
 static void velocityCallback(const geometry_msgs::Twist &twist_msg)
 {
     RosbotDrive &drive = RosbotDrive::getInstance();
-    RosbotSpeed speed = {twist_msg.linear.x, twist_msg.linear.y, twist_msg.angular.z};
+    RosbotSpeed speed = {static_cast<float>(twist_msg.linear.x), static_cast<float>(twist_msg.linear.y), static_cast<float>(twist_msg.angular.z)};
     rk->setRosbotSpeed(drive, speed);
     last_speed_command_time = odom_watchdog_timer.read_ms();
     is_speed_watchdog_active = false;
@@ -483,6 +482,7 @@ public:
     uint8_t configureServo(const char *datain, const char **dataout);
     uint8_t getPid(const char *datain, const char **dataout);
     uint8_t configurePid(const char *datain, const char **dataout);
+    uint8_t setKinematics(const char *datain, const char **dataout);
 
 private:
     ConfigFunctionality();
@@ -504,6 +504,7 @@ private:
     static const char GSER_COMMAND[];
     static const char GPID_COMMAND[];
     static const char CPID_COMMAND[];
+    static const char SKIN_COMMAND[];
     map<std::string, configuration_srv_fun_t> _commands;
 };
 
@@ -525,6 +526,7 @@ const char ConfigFunctionality::CSER_COMMAND[] = "CSER";
 const char ConfigFunctionality::GSER_COMMAND[] = "GSER";
 const char ConfigFunctionality::GPID_COMMAND[] = "GPID";
 const char ConfigFunctionality::CPID_COMMAND[] = "CPID";
+const char ConfigFunctionality::SKIN_COMMAND[] = "SKIN";
 
 ConfigFunctionality::ConfigFunctionality()
 {
@@ -542,6 +544,7 @@ ConfigFunctionality::ConfigFunctionality()
     _commands[CSER_COMMAND] = &ConfigFunctionality::configureServo;
     _commands[GPID_COMMAND] = &ConfigFunctionality::getPid;
     _commands[CPID_COMMAND] = &ConfigFunctionality::configurePid;
+    _commands[SKIN_COMMAND] = &ConfigFunctionality::setKinematics;
 }
 
 uint8_t ConfigFunctionality::enableTfMessages(const char *datain, const char **dataout)
@@ -637,7 +640,7 @@ uint8_t ConfigFunctionality::setAnimation(const char *datain, const char **datao
         return rosbot_ekf::Configuration::Response::FAILURE;
     }
 #endif
-    return rosbot_ekf::Configuration::Response::FAILURE;
+    return rosbot_ekf::Configuration::Response::SUCCESS;
 }
 
 ConfigFunctionality::configuration_srv_fun_t ConfigFunctionality::findFunctionality(const char *command)
@@ -666,6 +669,37 @@ uint8_t ConfigFunctionality::resetOdom(const char *datain, const char **dataout)
 {
     RosbotDrive &drive = RosbotDrive::getInstance();
     rk->resetRosbotOdometry(drive, odometry);
+    
+    return rosbot_ekf::Configuration::Response::SUCCESS;
+}
+
+uint8_t ConfigFunctionality::setKinematics(const char *datain, const char **dataout)
+{
+    std::string data = datain;
+    if (data == "DIFF")
+    {
+        nh.loginfo("Differential drive mode");
+        rk->~RosbotKinematics();
+        rk = rosbot_kinematics::RosbotKinematics::kinematicsType(0);
+        rk->setOdomParams();
+        // RosbotDrive &drive = RosbotDrive::getInstance();
+        // rk->resetRosbotOdometry(drive, odometry);
+    }
+    else if (data == "MEC")
+    {
+        nh.loginfo("Mecanum drive mode");
+        rk->~RosbotKinematics();
+        rk = rosbot_kinematics::RosbotKinematics::kinematicsType(1);
+        rk->setOdomParams();
+        RosbotDrive &drive = RosbotDrive::getInstance();
+        // rk->resetRosbotOdometry(drive, odometry);
+    }
+    else
+    {
+        nh.loginfo("Unrecognized data, use DIFF or MEC, provided:");
+        nh.loginfo(datain);
+        return rosbot_ekf::Configuration::Response::FAILURE;
+    }
     return rosbot_ekf::Configuration::Response::SUCCESS;
 }
 
@@ -674,7 +708,7 @@ uint8_t ConfigFunctionality::enableImu(const char *datain, const char **dataout)
     int en;
     if (sscanf(datain, "%d", &en) == 1)
     {
-        if(en)
+        if (en)
         {
             imu_driver_ptr->start();
         }
@@ -682,7 +716,7 @@ uint8_t ConfigFunctionality::enableImu(const char *datain, const char **dataout)
         {
             imu_driver_ptr->stop();
         }
-        return rosbot_ekf::Configuration::Response::SUCCESS; 
+        return rosbot_ekf::Configuration::Response::SUCCESS;
     }
     return rosbot_ekf::Configuration::Response::FAILURE;
 }
@@ -832,8 +866,8 @@ int print_debug_info()
 int main()
 {
     int spin_result;
-    int err_msg=0;
-    uint32_t spin_count=1;
+    int err_msg = 0;
+    uint32_t spin_count = 1;
     float curr_odom_calc_time, last_odom_calc_time = 0.0f;
 
     ThisThread::sleep_for(100);
@@ -841,6 +875,8 @@ int main()
     ThisThread::sleep_for(100);
     odom_watchdog_timer.start();
 
+    rk = rosbot_kinematics::RosbotKinematics::kinematicsType(0);
+    rk->setOdomParams();
     RosbotDrive &drive = RosbotDrive::getInstance();
     MultiDistanceSensor &distance_sensors = MultiDistanceSensor::getInstance();
 
@@ -867,22 +903,20 @@ int main()
         distance_sensors_init_flag = true;
     }
 
-    rk = rosbot_kinematics::RosbotKinematics::kinematicsType(KINEMATICS_TYPE);
-
-    I2C * i2c_ptr = new I2C(IMU_I2C_SDA, IMU_I2C_SCL);
+    I2C *i2c_ptr = new I2C(IMU_I2C_SDA, IMU_I2C_SCL);
     i2c_ptr->frequency(IMU_I2C_FREQUENCY);
 
-    ImuDriver::Type type = ImuDriver::getType(i2c_ptr,2);
+    ImuDriver::Type type = ImuDriver::getType(i2c_ptr, 2);
     sprintf(imu_description_string, "Detected sensor: %s\r\n", imu_sensor_type_string[type]);
 
-    if(type != ImuDriver::UNKNOWN)
+    if (type != ImuDriver::UNKNOWN)
     {
-        imu_driver_ptr = new ImuDriver(i2c_ptr,type);
+        imu_driver_ptr = new ImuDriver(i2c_ptr, type);
         imu_driver_ptr->init();
         imu_driver_ptr->start();
         imu_init_flag = true;
     }
-       
+
     ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("cmd_vel", &velocityCallback);
     ros::Subscriber<std_msgs::UInt32> cmd_ser_sub("cmd_ser", &servoCallback);
     ros::ServiceServer<rosbot_ekf::Configuration::Request, rosbot_ekf::Configuration::Response> config_srv("config", responseCallback);
@@ -908,24 +942,25 @@ int main()
     print_debug_info();
 #endif /* MEMORY_DEBUG_INFO */
 
-    if(imu_init_flag)
+    if (imu_init_flag)
         imu_driver_ptr->start();
 
-    if(distance_sensors_init_flag)
+    if (distance_sensors_init_flag)
     {
-        uint8_t * data = distance_sensor_commands.alloc();
+        uint8_t *data = distance_sensor_commands.alloc();
         *data = 1;
         distance_sensor_commands.put(data);
         distance_sensors_enabled = true;
     }
-    
+
     while (1)
     {
-        if(is_speed_watchdog_enabled)
+        if (is_speed_watchdog_enabled)
         {
             if (!is_speed_watchdog_active && (odom_watchdog_timer.read_ms() - last_speed_command_time) > speed_watchdog_interval)
             {
                 RosbotSpeed speed = {0.0, 0.0, 0.0};
+                RosbotDrive &drive = RosbotDrive::getInstance();
                 rk->setRosbotSpeed(drive, speed);
                 is_speed_watchdog_active = true;
             }
@@ -939,6 +974,7 @@ int main()
         if (spin_count % 2 == 0)
         {
             curr_odom_calc_time = odom_watchdog_timer.read();
+            RosbotDrive &drive = RosbotDrive::getInstance();
             rk->updateRosbotOdometry(drive, odometry, curr_odom_calc_time - last_odom_calc_time);
             last_odom_calc_time = curr_odom_calc_time;
         }
@@ -1015,10 +1051,10 @@ int main()
         }
 
         osEvent evt1 = distance_sensor_mail_box.get(0);
-        if(evt1.status == osEventMail)
+        if (evt1.status == osEventMail)
         {
-            SensorsMeasurement * message = (SensorsMeasurement*)evt1.value.p;
-            if(message->status == MultiDistanceSensor::ERR_I2C_FAILURE)
+            SensorsMeasurement *message = (SensorsMeasurement *)evt1.value.p;
+            if (message->status == MultiDistanceSensor::ERR_I2C_FAILURE)
             {
                 err_msg++;
                 if (distance_sensor_commands.empty() && err_msg == 3)
@@ -1060,12 +1096,12 @@ int main()
         //         if(nh.connected()) range_pub[i]->publish(&range_msg[i]);
         //     }
         // }
-        
+
         osEvent evt2 = imu_sensor_mail_box.get(0);
 
-        if(evt2.status == osEventMail)
+        if (evt2.status == osEventMail)
         {
-            ImuDriver::ImuMesurement * message = (ImuDriver::ImuMesurement*)evt2.value.p;
+            ImuDriver::ImuMesurement *message = (ImuDriver::ImuMesurement *)evt2.value.p;
 
             imu_msg.header.stamp = nh.now(message->timestamp);
             imu_msg.orientation.x = message->orientation[0];
@@ -1078,7 +1114,8 @@ int main()
                 imu_msg.linear_acceleration[i] = message->linear_velocity[i];
             }
             imu_sensor_mail_box.free(message);
-            if(nh.connected()) imu_pub->publish(&imu_msg);
+            if (nh.connected())
+                imu_pub->publish(&imu_msg);
         }
 
         // LOGS
@@ -1090,7 +1127,7 @@ int main()
                 nh.loginfo(WELLCOME_STR);
                 if (!distance_sensors_init_flag)
                     nh.logerror("VL53L0X sensors initialisation failure!");
-                if(!imu_init_flag)
+                if (!imu_init_flag)
                     nh.logerror("No IMU sensor detected!");
                 else
                     nh.loginfo(imu_description_string);
