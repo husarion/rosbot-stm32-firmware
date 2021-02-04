@@ -6,46 +6,13 @@
 
 #define KINEMATICS_TYPE 1 // 0 diff drive, 1 mecanum
 
-#define POLARITY 0b00111100
-// #define POLARITY 0b11000011 // red wheels
-#define ROBOT_LENGTH 0.197
-#define ENCODER_CPR 48
-#define ROBOT_LENGTH_HALF ROBOT_LENGTH / 2.0
-
 #define MOTOR_FR MOTOR1
 #define MOTOR_FL MOTOR4
 #define MOTOR_RR MOTOR2
 #define MOTOR_RL MOTOR3
 
-// diff drive
-
-// #define ROBOT_WIDTH 0.215          // 0.22 0.195
-// #define ROBOT_WIDTH_HALF ROBOT_WIDTH / 2.0
-// #define DIAMETER_MODIFICATOR 1.106 // 1.24, 1.09, 1.164
-// #define TYRE_DEFLATION 1.042       // theoretical distance / real distance
-// #define GEAR_RATIO 34.014
-// // #define GEAR_RATIO 20.4        // red wheels
-// #define WHEEL_DIAMETER 0.085
-// #define WHEEL_RADIUS WHEEL_DIAMETER / 2.0
-
-// mecanum
-
-#define DISTANCE_FRONT_TO_REAR_WHEEL 0.11
-#define WHEEL_SEPARATION_LENGTH DISTANCE_FRONT_TO_REAR_WHEEL / 2 
-#define ROBOT_WIDTH 0.223          // 0.22 0.195
-#define ROBOT_WIDTH_HALF ROBOT_WIDTH / 2.0
-#define DIAMETER_MODIFICATOR 1.0 // 1.24, 1.09, 1.164
-#define TYRE_DEFLATION 1.0       // theoretical distance / real distance
-#define GEAR_RATIO 34.014
-// #define GEAR_RATIO 20.4        // red wheels
-#define ENCODER_CPR 48
-
-#define WHEEL_DIAMETER 0.097
-#define WHEEL_RADIUS WHEEL_DIAMETER / 2.0
-
 namespace rosbot_kinematics
 {
-
     extern RosbotWheel custom_wheel_params;
     struct Odometry
     {
@@ -77,6 +44,21 @@ namespace rosbot_kinematics
     class RosbotKinematics
     {
     protected:
+        const uint8_t POLARITY = 0b00111100;
+        // const uint8_t POLARITY =0b11000011; // red wheels
+        const float ROBOT_LENGTH = 0.197;
+        const uint8_t ENCODER_CPR = 48;
+        const float ROBOT_LENGTH_HALF = ROBOT_LENGTH / 2.0;
+        const float DISTANCE_FRONT_TO_REAR_WHEEL = 0.11;
+        const float WHEEL_SEPARATION_LENGTH = DISTANCE_FRONT_TO_REAR_WHEEL / 2;
+        const float ROBOT_WIDTH = 0.206; // 0.22 0.195
+        const float ROBOT_WIDTH_HALF = ROBOT_WIDTH / 2.0;
+        const float DIAMETER_MODIFICATOR = 1.0; // 1.24, 1.09, 1.164
+        const float TYRE_DEFLATION = 1.0;       // theoretical distance / real distance
+        const float GEAR_RATIO = 34.014;
+        const float WHEEL_DIAMETER = 0.097;
+        const float WHEEL_RADIUS = WHEEL_DIAMETER / 2.0;
+
     public:
         RosbotKinematics();
         static RosbotKinematics *kinematicsType(int type);
@@ -86,10 +68,20 @@ namespace rosbot_kinematics
         void resetRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom);
         virtual void calibrateOdometry(float diameter_modificator, float tyre_deflation);
         geometry_msgs::Twist getTwist(RosbotOdometry &odom);
+        virtual void setOdomParams();
     };
     class DifferentialDrive : public RosbotKinematics
     {
     private:
+        const float ROBOT_WIDTH = 0.215; // 0.22 0.195
+        const float ROBOT_WIDTH_HALF = ROBOT_WIDTH / 2.0;
+        const float DIAMETER_MODIFICATOR = 1.106; // 1.24, 1.09, 1.164
+        const float TYRE_DEFLATION = 1.042;       // theoretical distance / real distance
+        const float GEAR_RATIO = 34.014;
+        // const float GEAR_RATIO = 20.4;    // red wheels
+        const float WHEEL_DIAMETER = 0.085;
+        const float WHEEL_RADIUS = WHEEL_DIAMETER / 2.0;
+
     public:
         DifferentialDrive(/* args */);
         ~DifferentialDrive();
@@ -101,6 +93,16 @@ namespace rosbot_kinematics
     class MecanumDrive : public RosbotKinematics
     {
     private:
+        const float DISTANCE_FRONT_TO_REAR_WHEEL = 0.11;
+        const float WHEEL_SEPARATION_LENGTH = DISTANCE_FRONT_TO_REAR_WHEEL / 2;
+        const float ROBOT_WIDTH = 0.206; // 0.22 0.195
+        const float ROBOT_WIDTH_HALF = ROBOT_WIDTH / 2.0;
+        const float DIAMETER_MODIFICATOR = 1.0; // 1.24, 1.09, 1.164
+        const float TYRE_DEFLATION = 1.0;       // theoretical distance / real distance
+        const float GEAR_RATIO = 34.014;
+        const float WHEEL_DIAMETER = 0.097;
+        const float WHEEL_RADIUS = WHEEL_DIAMETER / 2.0;
+
     public:
         MecanumDrive(/* args */);
         ~MecanumDrive();

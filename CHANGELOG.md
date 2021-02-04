@@ -236,5 +236,8 @@ author: [byq77](https://github.com/byq77)
 ### Fixed
   - fixed bug with MPU9250 initialization (both sensors support)
 
-### [0.14.3] - 
-//TODO: Adam changes
+### [0.14.3] - 2021-02-04
+  - mecanum kinematics 
+  - service for change kinematics (DIFF/MEC)
+  - changed baud to "525000" for both Rosbot and Rosbot PRO
+  - BUG found: resetting odometry not working 

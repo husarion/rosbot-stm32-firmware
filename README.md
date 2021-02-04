@@ -343,6 +343,24 @@ At the moment following commands are available:
     * `B <hex color code>` - BLINK FRONT/REAR ANIMATION
     * `R` - RAINBOW ANIMATION
 
+* `SKIN` - SET ROSBOT KINEMATICS DIFFERENTIAL/MECANUM 
+
+    By default robot always start with differential drive kinematics available to change by command
+    ```bash
+    $ rosservice call /config "command 'SKIN'
+    >data 'DIFF'
+    ```
+    
+    To set mecanum kinematics run 
+    
+    ```bash
+    $ rosservice call /config "command 'SKIN'
+    >data 'MEC'
+    ```
+    * `MEC` - mecanum kinematics
+    * `DIFF` - differential drive kinematics 
+
+
 ### ROS requirements - `rosbot_ekf` package
 > TODO: change rosbot_ekf lib
 

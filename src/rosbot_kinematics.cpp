@@ -3,13 +3,7 @@
 namespace rosbot_kinematics
 {
 
-    RosbotWheel custom_wheel_params = {
-        .radius = WHEEL_RADIUS,
-        .diameter_modificator = DIAMETER_MODIFICATOR,
-        .tyre_deflation = TYRE_DEFLATION,
-        .gear_ratio = GEAR_RATIO,
-        .encoder_cpr = ENCODER_CPR,
-        .polarity = POLARITY};
+    RosbotWheel custom_wheel_params{};
 
     RosbotKinematics::RosbotKinematics()
     {
@@ -17,6 +11,17 @@ namespace rosbot_kinematics
 
     RosbotKinematics::~RosbotKinematics()
     {
+    }
+
+    void RosbotKinematics::setOdomParams()
+    {
+        custom_wheel_params = {
+            .radius = this->WHEEL_RADIUS,
+            .diameter_modificator = this->DIAMETER_MODIFICATOR,
+            .tyre_deflation = this->TYRE_DEFLATION,
+            .gear_ratio = this->GEAR_RATIO,
+            .encoder_cpr = this->ENCODER_CPR,
+            .polarity = this->POLARITY};
     }
 
     void RosbotKinematics::resetRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom)
@@ -149,11 +154,11 @@ namespace rosbot_kinematics
         iodom->robot_angular_vel = (-iodom->wheel_FL_ang_vel + iodom->wheel_FR_ang_vel - iodom->wheel_RL_ang_vel + iodom->wheel_RR_ang_vel) * (WHEEL_RADIUS / (8 * (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH)));
 
         double delta_heading = iodom->robot_angular_vel / dtime; // [radians/s^2]
-        iodom->robot_angular_pos = iodom->robot_angular_pos + delta_heading * dtime * dtime *2;
+        iodom->robot_angular_pos = iodom->robot_angular_pos + delta_heading * dtime * dtime * 2;
         double delta_x = (iodom->robot_x_vel * cos(iodom->robot_angular_pos) - iodom->robot_y_vel * sin(iodom->robot_angular_pos)) / dtime; // [m]
         double delta_y = (iodom->robot_x_vel * sin(iodom->robot_angular_pos) + iodom->robot_y_vel * cos(iodom->robot_angular_pos)) / dtime; // [m]
-        iodom->robot_x_pos = iodom->robot_x_pos + delta_x * dtime * dtime ;
-        iodom->robot_y_pos = iodom->robot_y_pos + delta_y * dtime * dtime ;
+        iodom->robot_x_pos = iodom->robot_x_pos + delta_x * dtime * dtime;
+        iodom->robot_y_pos = iodom->robot_y_pos + delta_y * dtime * dtime;
 
         iodom->wheel_FR_ang_pos = curr_wheel_FR_ang_pos;
         iodom->wheel_FL_ang_pos = curr_wheel_FL_ang_pos;
