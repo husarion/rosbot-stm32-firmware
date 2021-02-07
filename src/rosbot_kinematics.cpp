@@ -123,10 +123,10 @@ namespace rosbot_kinematics
     {
         NewTargetSpeed new_speed;
         new_speed.mode = MPS;
-        new_speed.speed[MOTOR_FR] = (speed.lin_x + speed.lin_y + (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH) * 2 * speed.ang_z); //  # m/s
-        new_speed.speed[MOTOR_FL] = (speed.lin_x - speed.lin_y - (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH) * 2 * speed.ang_z);
-        new_speed.speed[MOTOR_RR] = (speed.lin_x - speed.lin_y + (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH) * 2 * speed.ang_z);
-        new_speed.speed[MOTOR_RL] = (speed.lin_x + speed.lin_y - (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH) * 2 * speed.ang_z);
+        new_speed.speed[MOTOR_FR] = (speed.lin_x + speed.lin_y + (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH) * speed.ang_z); //  # m/s
+        new_speed.speed[MOTOR_FL] = (speed.lin_x - speed.lin_y - (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH) * speed.ang_z);
+        new_speed.speed[MOTOR_RR] = (speed.lin_x - speed.lin_y + (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH) * speed.ang_z);
+        new_speed.speed[MOTOR_RL] = (speed.lin_x + speed.lin_y - (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH) * speed.ang_z);
         drive.updateTargetSpeed(new_speed);
     }
 
@@ -149,7 +149,7 @@ namespace rosbot_kinematics
 
         odom.robot_x_vel = (odom.wheel_FR_ang_vel + odom.wheel_FL_ang_vel + odom.wheel_RR_ang_vel + odom.wheel_RL_ang_vel) * (WHEEL_RADIUS / 4);
         odom.robot_y_vel = (-odom.wheel_FL_ang_vel + odom.wheel_FR_ang_vel + odom.wheel_RL_ang_vel - odom.wheel_RR_ang_vel) * (WHEEL_RADIUS / 4);
-        odom.robot_angular_vel = (-odom.wheel_FL_ang_vel + odom.wheel_FR_ang_vel - odom.wheel_RL_ang_vel + odom.wheel_RR_ang_vel) * (WHEEL_RADIUS / (8 * (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH)));
+        odom.robot_angular_vel = (-odom.wheel_FL_ang_vel + odom.wheel_FR_ang_vel - odom.wheel_RL_ang_vel + odom.wheel_RR_ang_vel) * (WHEEL_RADIUS / (4 * (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH)));
 
         double delta_heading = odom.robot_angular_vel / dtime; // [radians/s^2]
         odom.robot_angular_pos = odom.robot_angular_pos + delta_heading * dtime * dtime * 2;
