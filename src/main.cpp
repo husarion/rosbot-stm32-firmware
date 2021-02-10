@@ -1,8 +1,6 @@
 /** @file main.cpp
  * ROSbot firmware.
  * 
- * @date 18-12-2020
- * @version 0.14.2
  * @copyright GNU GPL-3.0
  */
 #include <rosbot_kinematics.h>
@@ -15,7 +13,13 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/UInt32.h>
 #include <rosbot_ekf/Imu.h>
-#include <sensor_msgs/BatteryState.h>
+
+#if defined(ROS_NOETIC_MSGS) //TODO: add information to README about compiling for noetic/melodic (flags)
+    #include <sensor_msgs_neotic/BatteryState.h>
+#else
+    #include <sensor_msgs/BatteryState.h>
+#endif
+
 #include <sensor_msgs/Range.h>
 #include "tf/tf.h"
 #include "tf/transform_broadcaster.h"
