@@ -9,13 +9,12 @@
 #include <ros.h>
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Twist.h>
-#include <sensor_msgs/BatteryState.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/UInt32.h>
 #include <rosbot_ekf/Imu.h>
 
 #if defined(ROS_NOETIC_MSGS) //TODO: add information to README about compiling for noetic/melodic (flags)
-    #include <sensor_msgs_neotic/BatteryState.h>
+    #include <sensor_msgs_noetic/BatteryState.h>
 #else
     #include <sensor_msgs/BatteryState.h>
 #endif

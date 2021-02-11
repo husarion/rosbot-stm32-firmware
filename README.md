@@ -48,6 +48,13 @@ netsocket/*
 nfc/*
 unsupported/*
 ```
+
+## Build for ROS Melodic/Kinetic
+By default the ROSbot firmware supports **ROS Noetic**. To build it for previous ROS distributions **remove** below flag from `platformio.ini`:
+```
+-D ROS_NOETIC_MSGS
+```
+
 ## Build firmware
 Use `PlatformIO: Build` task.
 
