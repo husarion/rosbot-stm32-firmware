@@ -1131,6 +1131,18 @@ int main()
                 imu_msg.linear_acceleration.y = message->angular_velocity[i++];
                 imu_msg.linear_acceleration.z = message->angular_velocity[i++];
 
+                imu_msg.orientation_covariance[0] = 0.05;
+                imu_msg.orientation_covariance[4] = 0.05;
+                imu_msg.orientation_covariance[8] = 0.05;
+
+                imu_msg.angular_velocity_covariance[0] = 0.1;
+                imu_msg.angular_velocity_covariance[4] = 0.1;
+                imu_msg.angular_velocity_covariance[8] = 0.1;
+
+                imu_msg.linear_acceleration_covariance[0] = 0.5;
+                imu_msg.linear_acceleration_covariance[4] = 0.5;
+                imu_msg.linear_acceleration_covariance[8] = 0.5;
+
                 imu_pub->publish(&imu_msg);
             }
 
