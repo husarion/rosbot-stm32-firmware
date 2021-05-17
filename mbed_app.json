@@ -1,6 +1,6 @@
 {
     "macros": [
-        "ROSBOT_FW_VERSION=\"0.14.3\"",
+        "ROSBOT_FW_VERSION=\"0.14.4\"",
         "WELLCOME_BANNER"
     ],
     "target_overrides": {

@@ -11,7 +11,8 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/UInt32.h>
-#include <rosbot_ekf/Imu.h>
+#include <sensor_msgs/Imu.h>
+// #include <rosbot_ekf/Imu.h>
 
 #if defined(ROS_NOETIC_MSGS) //TODO: add information to README about compiling for noetic/melodic (flags)
     #include <sensor_msgs_noetic/BatteryState.h>
@@ -77,7 +78,8 @@ sensor_msgs::BatteryState battery_state;
 sensor_msgs::Range range_msg[4];
 geometry_msgs::PoseStamped pose;
 std_msgs::UInt8 button_msg;
-rosbot_ekf::Imu imu_msg;
+// rosbot_ekf::Imu imu_msg;
+sensor_msgs::Imu imu_msg;
 ros::NodeHandle nh;
 ros::Publisher *vel_pub;
 ros::Publisher *joint_state_pub;
@@ -1106,19 +1108,33 @@ int main()
         {
             ImuDriver::ImuMesurement *message = (ImuDriver::ImuMesurement *)evt2.value.p;
 
-            imu_msg.header.stamp = nh.now(message->timestamp);
-            imu_msg.orientation.x = message->orientation[0];
-            imu_msg.orientation.y = message->orientation[1];
-            imu_msg.orientation.z = message->orientation[2];
-            imu_msg.orientation.w = message->orientation[3];
-            for (int i = 0; i < 3; i++)
+            if(nh.connected())
             {
-                imu_msg.angular_velocity[i] = message->angular_velocity[i];
-                imu_msg.linear_acceleration[i] = message->linear_velocity[i];
-            }
-            imu_sensor_mail_box.free(message);
-            if (nh.connected())
+                int i = 0;
+
+                imu_msg.header.stamp = nh.now(message->timestamp);
+
+                imu_msg.orientation.x = message->orientation[i++];
+                imu_msg.orientation.y = message->orientation[i++];
+                imu_msg.orientation.z = message->orientation[i++];
+                imu_msg.orientation.w = message->orientation[i++];
+
+                i = 0;
+
+                imu_msg.angular_velocity.x = message->angular_velocity[i++];
+                imu_msg.angular_velocity.y = message->angular_velocity[i++];
+                imu_msg.angular_velocity.z = message->angular_velocity[i++];
+
+                i = 0;
+
+                imu_msg.linear_acceleration.x = message->angular_velocity[i++];
+                imu_msg.linear_acceleration.y = message->angular_velocity[i++];
+                imu_msg.linear_acceleration.z = message->angular_velocity[i++];
+
                 imu_pub->publish(&imu_msg);
+            }
+
+            imu_sensor_mail_box.free(message);
         }
 
         // LOGS
