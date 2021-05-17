@@ -139,7 +139,7 @@ const char *range_pub_names[] = {"range/fr", "range/fl", "range/rr", "range/rl"}
 
 static void initImuPublisher()
 {
-    imu_pub = new ros::Publisher("mpu9250", &imu_msg);
+    imu_pub = new ros::Publisher("imu", &imu_msg);
     nh.advertise(*imu_pub);
 }
 
