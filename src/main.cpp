@@ -1110,9 +1110,11 @@ int main()
 
             if(nh.connected())
             {
-                int i = 0;
 
                 imu_msg.header.stamp = nh.now(message->timestamp);
+                imu_msg.header.frame_id = "imu_link";
+                
+                int i = 0;
 
                 imu_msg.orientation.x = message->orientation[i++];
                 imu_msg.orientation.y = message->orientation[i++];
