@@ -140,6 +140,21 @@ const char *range_pub_names[] = {"range/fr", "range/fl", "range/rr", "range/rl"}
 static void initImuPublisher()
 {
     imu_pub = new ros::Publisher("imu", &imu_msg);
+
+    imu_msg.header.frame_id = "imu_link";
+
+    imu_msg.orientation_covariance[0] = 0.05;
+    imu_msg.orientation_covariance[4] = 0.05;
+    imu_msg.orientation_covariance[8] = 0.05;
+
+    imu_msg.angular_velocity_covariance[0] = 0.1;
+    imu_msg.angular_velocity_covariance[4] = 0.1;
+    imu_msg.angular_velocity_covariance[8] = 0.1;
+
+    imu_msg.linear_acceleration_covariance[0] = 0.5;
+    imu_msg.linear_acceleration_covariance[4] = 0.5;
+    imu_msg.linear_acceleration_covariance[8] = 0.5;
+
     nh.advertise(*imu_pub);
 }
 
@@ -1110,41 +1125,18 @@ int main()
 
             if(nh.connected())
             {
-
-                imu_msg.header.stamp = nh.now(message->timestamp);
-                imu_msg.header.frame_id = "imu_link";
-                
                 int i = 0;
-
-                imu_msg.orientation.x = message->orientation[i++];
-                imu_msg.orientation.y = message->orientation[i++];
-                imu_msg.orientation.z = message->orientation[i++];
-                imu_msg.orientation.w = message->orientation[i++];
-
-                i = 0;
-
-                imu_msg.angular_velocity.x = message->angular_velocity[i++];
-                imu_msg.angular_velocity.y = message->angular_velocity[i++];
-                imu_msg.angular_velocity.z = message->angular_velocity[i++];
-
-                i = 0;
-
+                imu_msg.header.stamp = nh.now(message->timestamp);
+                imu_msg.orientation.x = message->orientation[i];
+                imu_msg.angular_velocity.x = message->angular_velocity[i];
                 imu_msg.linear_acceleration.x = message->angular_velocity[i++];
+                imu_msg.orientation.y = message->orientation[i];
+                imu_msg.angular_velocity.y = message->angular_velocity[i];
                 imu_msg.linear_acceleration.y = message->angular_velocity[i++];
+                imu_msg.orientation.z = message->orientation[i];
+                imu_msg.angular_velocity.z = message->angular_velocity[i];
                 imu_msg.linear_acceleration.z = message->angular_velocity[i++];
-
-                imu_msg.orientation_covariance[0] = 0.05;
-                imu_msg.orientation_covariance[4] = 0.05;
-                imu_msg.orientation_covariance[8] = 0.05;
-
-                imu_msg.angular_velocity_covariance[0] = 0.1;
-                imu_msg.angular_velocity_covariance[4] = 0.1;
-                imu_msg.angular_velocity_covariance[8] = 0.1;
-
-                imu_msg.linear_acceleration_covariance[0] = 0.5;
-                imu_msg.linear_acceleration_covariance[4] = 0.5;
-                imu_msg.linear_acceleration_covariance[8] = 0.5;
-
+                imu_msg.orientation.w = message->orientation[i];
                 imu_pub->publish(&imu_msg);
             }
 
