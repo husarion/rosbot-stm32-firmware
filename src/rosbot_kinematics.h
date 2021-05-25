@@ -68,12 +68,12 @@ namespace rosbot_kinematics
         const float ROBOT_LENGTH_HALF = ROBOT_LENGTH / 2.0;
         const float DISTANCE_FRONT_TO_REAR_WHEEL = 0.11;
         const float WHEEL_SEPARATION_LENGTH = DISTANCE_FRONT_TO_REAR_WHEEL / 2;
-        const float ROBOT_WIDTH = 0.206; // 0.22 0.195
+        const float ROBOT_WIDTH = 0.215 ; // 0.22 0.195
         const float ROBOT_WIDTH_HALF = ROBOT_WIDTH / 2.0;
-        const float DIAMETER_MODIFICATOR = 1.0; // 1.24, 1.09, 1.164
-        const float TYRE_DEFLATION = 1.0;       // theoretical distance / real distance
+        const float DIAMETER_MODIFICATOR = 1.106; // 1.24, 1.09, 1.164
+        const float TYRE_DEFLATION = 1.042 ;       // theoretical distance / real distance
         const float GEAR_RATIO = 34.014;
-        const float WHEEL_DIAMETER = 0.097;
+        const float WHEEL_DIAMETER = 0.085;
         const float WHEEL_RADIUS = WHEEL_DIAMETER / 2.0;
 
     public:

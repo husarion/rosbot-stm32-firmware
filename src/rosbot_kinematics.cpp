@@ -83,14 +83,11 @@ namespace rosbot_kinematics
         odom.wheel_R_ang_pos = curr_wheel_R_ang_pos;
         odom.robot_angular_vel = (((odom.wheel_R_ang_pos - odom.wheel_L_ang_pos) * WHEEL_RADIUS / (ROBOT_WIDTH * custom_wheel_params.diameter_modificator)) - odom.robot_angular_pos) / dtime;
         odom.robot_angular_pos = (odom.wheel_R_ang_pos - odom.wheel_L_ang_pos) * WHEEL_RADIUS / (ROBOT_WIDTH * custom_wheel_params.diameter_modificator);
-        float vel_x = (odom.wheel_L_ang_vel * WHEEL_RADIUS + odom.robot_angular_vel * ROBOT_WIDTH_HALF) * cos(odom.robot_angular_pos);
-        float vel_y = (odom.wheel_L_ang_vel * WHEEL_RADIUS + odom.robot_angular_vel * ROBOT_WIDTH_HALF) * sin(odom.robot_angular_pos);
-        
-        odom.robot_x_vel = sqrt(vel_x * vel_x + vel_y * vel_y); // is this needed?
-        odom.robot_y_vel = 0.0; // is this needed?
+        odom.robot_x_vel = (odom.wheel_L_ang_vel * WHEEL_RADIUS + odom.robot_angular_vel * ROBOT_WIDTH_HALF) * cos(odom.robot_angular_pos);
+        odom.robot_y_vel = (odom.wheel_L_ang_vel * WHEEL_RADIUS + odom.robot_angular_vel * ROBOT_WIDTH_HALF) * sin(odom.robot_angular_pos);
+        odom.robot_x_pos = odom.robot_x_pos + odom.robot_x_vel * dtime;
+        odom.robot_y_pos = odom.robot_y_pos + odom.robot_y_vel * dtime;
 
-        odom.robot_x_pos = odom.robot_x_pos + vel_x * dtime;
-        odom.robot_y_pos = odom.robot_y_pos + vel_y * dtime;
     }
 
     void DifferentialDrive::setRosbotSpeed(RosbotDrive &drive, RosbotSpeed &speed)
