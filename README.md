@@ -9,7 +9,7 @@ ______  _____  _____  _             _           __
 | |\ \ \ \_/ //\__/ /| |_) || (_) || |_       | |   \ V  V / 
 \_| \_| \___/ \____/ |_.__/  \___/  \__|      |_|    \_/\_/  
 ```                                                    
-**Firmware version:** `0.14.4`
+**Firmware version:** `0.14.5`
 
 ## Prerequisites
 You need to install following tools:
@@ -52,7 +52,7 @@ unsupported/*
 ## Build for ROS Melodic/Kinetic
 By default the ROSbot firmware supports **ROS Noetic**. To build it for previous ROS distributions **remove** below flag from `platformio.ini`:
 ```
--D ROS_NOETIC_MSGS
+-D ROS_NOETIC_MSGS=1
 ```
 
 ## Build firmware

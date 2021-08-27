@@ -1,7 +1,8 @@
 /** @file main.cpp
  * ROSbot firmware.
  * 
- * @copyright GNU GPL-3.0
+ * @author Husarion
+ * @copyright MIT
  */
 #include <rosbot_kinematics.h>
 #include <rosbot_sensors.h>
@@ -14,7 +15,11 @@
 #include <sensor_msgs/Imu.h>
 // #include <rosbot_ekf/Imu.h>
 
-#if defined(ROS_NOETIC_MSGS) //TODO: add information to README about compiling for noetic/melodic (flags)
+#ifndef ROS_NOETIC_MSGS
+#   define ROS_NOETIC_MSGS 0
+#endif
+
+#if ROS_NOETIC_MSGS
     #include <sensor_msgs_noetic/BatteryState.h>
 #else
     #include <sensor_msgs/BatteryState.h>
@@ -117,8 +122,6 @@ Timer odom_watchdog_timer;
 volatile uint32_t last_speed_command_time = 0;
 
 rosbot_sensors::ServoManger servo_manager;
-
-
 
 static void button1Callback()
 {
