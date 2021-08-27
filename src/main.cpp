@@ -92,6 +92,9 @@ geometry_msgs::TransformStamped robot_tf;
 tf::TransformBroadcaster broadcaster;
 
 rosbot_kinematics::RosbotOdometry odometry;
+rosbot_kinematics::DifferentialDrive diff_drive_kinematics;
+rosbot_kinematics::MecanumDrive mecanum_drive_kinematics;
+rosbot_kinematics::RosbotKinematics *rk = &diff_drive_kinematics; // default one
 
 volatile bool distance_sensors_enabled = false;
 volatile bool joint_states_enabled = false;
@@ -115,7 +118,7 @@ volatile uint32_t last_speed_command_time = 0;
 
 rosbot_sensors::ServoManger servo_manager;
 
-rosbot_kinematics::RosbotKinematics *rk = nullptr;
+
 
 static void button1Callback()
 {
@@ -503,6 +506,7 @@ public:
     uint8_t getPid(const char *datain, const char **dataout);
     uint8_t configurePid(const char *datain, const char **dataout);
     uint8_t setKinematics(const char *datain, const char **dataout);
+    uint8_t getKinematics(const char *datain, const char **dataout);
 
 private:
     ConfigFunctionality();
@@ -525,6 +529,7 @@ private:
     static const char GPID_COMMAND[];
     static const char CPID_COMMAND[];
     static const char SKIN_COMMAND[];
+    static const char GKIN_COMMAND[];
     map<std::string, configuration_srv_fun_t> _commands;
 };
 
@@ -547,6 +552,7 @@ const char ConfigFunctionality::GSER_COMMAND[] = "GSER";
 const char ConfigFunctionality::GPID_COMMAND[] = "GPID";
 const char ConfigFunctionality::CPID_COMMAND[] = "CPID";
 const char ConfigFunctionality::SKIN_COMMAND[] = "SKIN";
+const char ConfigFunctionality::GKIN_COMMAND[] = "GKIN";
 
 ConfigFunctionality::ConfigFunctionality()
 {
@@ -565,6 +571,7 @@ ConfigFunctionality::ConfigFunctionality()
     _commands[GPID_COMMAND] = &ConfigFunctionality::getPid;
     _commands[CPID_COMMAND] = &ConfigFunctionality::configurePid;
     _commands[SKIN_COMMAND] = &ConfigFunctionality::setKinematics;
+    _commands[GKIN_COMMAND] = &ConfigFunctionality::getKinematics;
 }
 
 uint8_t ConfigFunctionality::enableTfMessages(const char *datain, const char **dataout)
@@ -695,31 +702,37 @@ uint8_t ConfigFunctionality::resetOdom(const char *datain, const char **dataout)
 
 uint8_t ConfigFunctionality::setKinematics(const char *datain, const char **dataout)
 {
-    std::string data = datain;
-    if (data == "DIFF")
+    if (strcmp(datain, "DIFF") == 0)
     {
         nh.loginfo("Differential drive mode");
-        rk->~RosbotKinematics();
-        rk = rosbot_kinematics::RosbotKinematics::kinematicsType(0);
+        rk = &diff_drive_kinematics;
         rk->setOdomParams();
         RosbotDrive &drive = RosbotDrive::getInstance();
         rk->resetRosbotOdometry(drive, odometry);
     }
-    else if (data == "MEC")
+    else if (strcmp(datain, "MEC") == 0)
     {
         nh.loginfo("Mecanum drive mode");
-        rk->~RosbotKinematics();
-        rk = rosbot_kinematics::RosbotKinematics::kinematicsType(1);
+        rk = &mecanum_drive_kinematics;
         rk->setOdomParams();
         RosbotDrive &drive = RosbotDrive::getInstance();
         rk->resetRosbotOdometry(drive, odometry);
     }
     else
     {
-        nh.loginfo("Unrecognized data, use DIFF or MEC, provided:");
-        nh.loginfo(datain);
+        nh.logerror("Unrecognized data, use DIFF or MEC, provided:");
+        nh.logerror(datain);
         return rosbot_ekf::Configuration::Response::FAILURE;
     }
+    return rosbot_ekf::Configuration::Response::SUCCESS;
+}
+
+uint8_t ConfigFunctionality::getKinematics(const char *datain, const char **dataout)
+{
+    if (rk->getKinematicsType() == KINEMATICS_TYPE_DIFF_DRIVE)
+        *dataout = "DIFF";
+    else if(rk->getKinematicsType() == KINEMATICS_TYPE_MECANUM_DRIVE)
+        *dataout = "MEC";
     return rosbot_ekf::Configuration::Response::SUCCESS;
 }
 
@@ -895,7 +908,7 @@ int main()
     ThisThread::sleep_for(100);
     odom_watchdog_timer.start();
 
-    rk = rosbot_kinematics::RosbotKinematics::kinematicsType(0);
+    rk = &diff_drive_kinematics;
     rk->setOdomParams();
     RosbotDrive &drive = RosbotDrive::getInstance();
     MultiDistanceSensor &distance_sensors = MultiDistanceSensor::getInstance();

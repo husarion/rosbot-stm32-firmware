@@ -4,7 +4,8 @@
 #include <RosbotDrive.h>
 #include <geometry_msgs/Twist.h>
 
-#define KINEMATICS_TYPE 1 // 0 diff drive, 1 mecanum
+#define KINEMATICS_TYPE_DIFF_DRIVE 0
+#define KINEMATICS_TYPE_MECANUM_DRIVE 1
 
 #define MOTOR_FR MOTOR1
 #define MOTOR_FL MOTOR4
@@ -78,13 +79,13 @@ namespace rosbot_kinematics
 
     public:
         RosbotKinematics();
-        static RosbotKinematics *kinematicsType(int type);
         virtual ~RosbotKinematics();
+        virtual int getKinematicsType() = 0;
         virtual void setRosbotSpeed(RosbotDrive &drive, RosbotSpeed &speed) = 0;
         virtual void updateRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom, float dtime) = 0;
-        void resetRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom);
+        virtual void resetRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom);
         virtual void calibrateOdometry(float diameter_modificator, float tyre_deflation);
-        geometry_msgs::Twist getTwist(RosbotOdometry &odom);
+        virtual geometry_msgs::Twist getTwist(RosbotOdometry &odom);
         virtual void setOdomParams();
     };
     class DifferentialDrive : public RosbotKinematics
@@ -102,9 +103,10 @@ namespace rosbot_kinematics
     public:
         DifferentialDrive(/* args */);
         ~DifferentialDrive();
-        void setRosbotSpeed(RosbotDrive &drive, RosbotSpeed &speed);
+        void setRosbotSpeed(RosbotDrive &drive, RosbotSpeed &speed) override;
         void setRosbotSpeed(RosbotDrive &drive, float linear_x, float angular_z);
-        void updateRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom, float dtime);
+        void updateRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom, float dtime) override;
+        int getKinematicsType() override;
     };
 
     class MecanumDrive : public RosbotKinematics
@@ -123,8 +125,9 @@ namespace rosbot_kinematics
     public:
         MecanumDrive(/* args */);
         ~MecanumDrive();
-        void setRosbotSpeed(RosbotDrive &drive, RosbotSpeed &speed);
-        void updateRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom, float dtime);
+        void setRosbotSpeed(RosbotDrive &drive, RosbotSpeed &speed) override;
+        void updateRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom, float dtime) override;
+        int getKinematicsType() override;
     };
 
 } // namespace rosbot_kinematics

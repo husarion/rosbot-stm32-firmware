@@ -38,16 +38,6 @@ namespace rosbot_kinematics
         custom_wheel_params.tyre_deflation = tyre_deflation;
     }
 
-    RosbotKinematics *RosbotKinematics::kinematicsType(int type)
-    {
-        if (type == 0)
-            return new DifferentialDrive;
-        else if (type == 1)
-            return new MecanumDrive;
-        else
-            return new DifferentialDrive;
-    }
-
     geometry_msgs::Twist RosbotKinematics::getTwist(RosbotOdometry &odom)
     {
         geometry_msgs::Twist twist{};
@@ -108,6 +98,8 @@ namespace rosbot_kinematics
         drive.updateTargetSpeed(new_speed);
     }
 
+    int DifferentialDrive::getKinematicsType() { return KINEMATICS_TYPE_DIFF_DRIVE; }
+
     //// mecanum -----------
 
     MecanumDrive::MecanumDrive()
@@ -162,5 +154,7 @@ namespace rosbot_kinematics
         odom.wheel_RR_ang_pos = curr_wheel_RR_ang_pos;
         odom.wheel_RL_ang_pos = curr_wheel_RL_ang_pos;
     }
+
+    int MecanumDrive::getKinematicsType() { return KINEMATICS_TYPE_MECANUM_DRIVE; }
 
 } // namespace rosbot_kinematics
