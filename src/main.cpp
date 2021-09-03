@@ -25,6 +25,10 @@
     #include <sensor_msgs/BatteryState.h>
 #endif
 
+#ifndef KINEMATIC_TYPE
+#   define KINEMATIC_TYPE 0
+#endif
+
 #include <sensor_msgs/Range.h>
 #include "tf/tf.h"
 #include "tf/transform_broadcaster.h"
@@ -99,7 +103,12 @@ tf::TransformBroadcaster broadcaster;
 rosbot_kinematics::RosbotOdometry odometry;
 rosbot_kinematics::DifferentialDrive diff_drive_kinematics;
 rosbot_kinematics::MecanumDrive mecanum_drive_kinematics;
-rosbot_kinematics::RosbotKinematics *rk = &diff_drive_kinematics; // default one
+
+#if KINEMATIC_TYPE
+    rosbot_kinematics::RosbotKinematics *rk = &mecanum_drive_kinematics;
+#else
+    rosbot_kinematics::RosbotKinematics *rk = &diff_drive_kinematics;
+#endif
 
 volatile bool distance_sensors_enabled = false;
 volatile bool joint_states_enabled = false;
@@ -911,7 +920,6 @@ int main()
     ThisThread::sleep_for(100);
     odom_watchdog_timer.start();
 
-    rk = &diff_drive_kinematics;
     rk->setOdomParams();
     RosbotDrive &drive = RosbotDrive::getInstance();
     MultiDistanceSensor &distance_sensors = MultiDistanceSensor::getInstance();
