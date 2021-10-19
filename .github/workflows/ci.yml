@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+    types: [assigned, opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      
+      - name: Build current project using platformio 
+        uses: docker://sglahn/platformio-core:latest
+        with:
+          args: run
+      
+      - name: Prepare firmware files
+        id: prepare
+        run: |
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+          mkdir out
+          cp .pio/build/core2_diff/firmware.bin out/firmware_diff.bin
+          cp .pio/build/core2_mec/firmware.bin out/firmware_mec.bin
+
+      - name: Upload firmware files
+        uses: actions/upload-artifact@v2
+        with:
+          name: firmware_${{ steps.prepare.outputs.sha_short }}
+          path: out/*
