@@ -1149,18 +1149,21 @@ int main()
 
             if(nh.connected())
             {
-                int i = 0;
                 imu_msg.header.stamp = nh.now(message->timestamp);
-                imu_msg.orientation.x = message->orientation[i];
-                imu_msg.angular_velocity.x = message->angular_velocity[i];
-                imu_msg.linear_acceleration.x = message->angular_velocity[i++];
-                imu_msg.orientation.y = message->orientation[i];
-                imu_msg.angular_velocity.y = message->angular_velocity[i];
-                imu_msg.linear_acceleration.y = message->angular_velocity[i++];
-                imu_msg.orientation.z = message->orientation[i];
-                imu_msg.angular_velocity.z = message->angular_velocity[i];
-                imu_msg.linear_acceleration.z = message->angular_velocity[i++];
-                imu_msg.orientation.w = message->orientation[i];
+
+                imu_msg.orientation.x = message->orientation[0];
+                imu_msg.orientation.y = message->orientation[1];
+                imu_msg.orientation.z = message->orientation[2];
+                imu_msg.orientation.w = message->orientation[3];
+
+                imu_msg.angular_velocity.x = message->angular_velocity[0];
+                imu_msg.angular_velocity.y = message->angular_velocity[1];
+                imu_msg.angular_velocity.z = message->angular_velocity[2];
+
+                imu_msg.linear_acceleration.x = message->linear_acceleration[0];
+                imu_msg.linear_acceleration.y = message->linear_acceleration[1];
+                imu_msg.linear_acceleration.z = message->linear_acceleration[2];
+                
                 imu_pub->publish(&imu_msg);
             }
 

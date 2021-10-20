@@ -251,3 +251,14 @@ author: [byq77](https://github.com/byq77)
 ### Fixed
   - fixed the bug in the odometry
   - reverted odometry params
+
+## [0.14.5] 
+
+TODO: add changes
+
+## [0.15.0] - 2021-10-20
+
+### Fixed
+- Fixed acc bug for both imu sensors.
+- Fixed the imu acc and gyro units to match units in the sensor_msgs/Imu message.
+- Fixed acc vector orientation for mpu9250.
