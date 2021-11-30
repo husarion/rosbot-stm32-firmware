@@ -143,7 +143,7 @@ namespace rosbot_kinematics
         odom.robot_angular_vel = (-odom.wheel_FL_ang_vel + odom.wheel_FR_ang_vel - odom.wheel_RL_ang_vel + odom.wheel_RR_ang_vel) * (WHEEL_RADIUS / (4 * (ROBOT_WIDTH_HALF + WHEEL_SEPARATION_LENGTH)));
 
         double delta_heading = odom.robot_angular_vel / dtime; // [radians/s^2]
-        odom.robot_angular_pos = odom.robot_angular_pos + delta_heading * dtime * dtime * 2;
+        odom.robot_angular_pos = odom.robot_angular_pos + delta_heading * dtime * dtime;
         double delta_x = (odom.robot_x_vel * cos(odom.robot_angular_pos) - odom.robot_y_vel * sin(odom.robot_angular_pos)) / dtime; // [m]
         double delta_y = (odom.robot_x_vel * sin(odom.robot_angular_pos) + odom.robot_y_vel * cos(odom.robot_angular_pos)) / dtime; // [m]
         odom.robot_x_pos = odom.robot_x_pos + delta_x * dtime * dtime;
