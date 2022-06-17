@@ -262,3 +262,9 @@ TODO: add changes
 - Fixed acc bug for both imu sensors.
 - Fixed the imu acc and gyro units to match units in the sensor_msgs/Imu message.
 - Fixed acc vector orientation for mpu9250.
+
+## [0.16.0] - 2022-06-17
+
+### Fixed
+- IMU driver update
+- Fixed odometry for mecanum wheels
