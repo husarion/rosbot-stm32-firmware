@@ -268,3 +268,8 @@ TODO: add changes
 ### Fixed
 - IMU driver update
 - Fixed odometry for mecanum wheels
+
+## [0.16.1] - 2022-06-17
+
+### Fixed
+- add JOINT_STATES_ENABLE flag 
