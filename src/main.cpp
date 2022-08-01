@@ -1,6 +1,6 @@
 /** @file main.cpp
  * ROSbot firmware.
- * 
+ *
  * @author Husarion
  * @copyright MIT
  */
@@ -16,17 +16,21 @@
 // #include <rosbot_ekf/Imu.h>
 
 #ifndef ROS_NOETIC_MSGS
-#   define ROS_NOETIC_MSGS 0
+#define ROS_NOETIC_MSGS 0
 #endif
 
 #if ROS_NOETIC_MSGS
-    #include <sensor_msgs_noetic/BatteryState.h>
+#include <sensor_msgs_noetic/BatteryState.h>
 #else
-    #include <sensor_msgs/BatteryState.h>
+#include <sensor_msgs/BatteryState.h>
 #endif
 
 #ifndef KINEMATIC_TYPE
-#   define KINEMATIC_TYPE 0
+#define KINEMATIC_TYPE 0
+#endif
+
+#ifndef JOINT_STATES_ENABLE
+#define JOINT_STATES_ENABLE 0
 #endif
 
 #include <sensor_msgs/Range.h>
@@ -105,13 +109,18 @@ rosbot_kinematics::DifferentialDrive diff_drive_kinematics;
 rosbot_kinematics::MecanumDrive mecanum_drive_kinematics;
 
 #if KINEMATIC_TYPE
-    rosbot_kinematics::RosbotKinematics *rk = &mecanum_drive_kinematics;
+rosbot_kinematics::RosbotKinematics *rk = &mecanum_drive_kinematics;
 #else
-    rosbot_kinematics::RosbotKinematics *rk = &diff_drive_kinematics;
+rosbot_kinematics::RosbotKinematics *rk = &diff_drive_kinematics;
+#endif
+
+#if JOINT_STATES_ENABLE
+volatile bool joint_states_enabled = true;
+#else
+volatile bool joint_states_enabled = false;
 #endif
 
 volatile bool distance_sensors_enabled = false;
-volatile bool joint_states_enabled = false;
 volatile bool tf_msgs_enabled = false;
 
 DigitalOut sens_power(SENS_POWER_ON, 0);
@@ -125,7 +134,7 @@ volatile bool button2_publish_flag = false;
 
 volatile bool is_speed_watchdog_enabled = true;
 volatile bool is_speed_watchdog_active = false;
-int speed_watchdog_interval = 1000; //ms
+int speed_watchdog_interval = 1000; // ms
 
 Timer odom_watchdog_timer;
 volatile uint32_t last_speed_command_time = 0;
@@ -249,13 +258,13 @@ static void initJointStatePublisher()
 
     joint_states.header.frame_id = "base_link";
 
-    //assigning the arrays to the message
+    // assigning the arrays to the message
     joint_states.name = (char **)joint_state_name;
     joint_states.position = pos;
     // joint_states.velocity = vel;
     // joint_states.effort = eff;
 
-    //setting the length
+    // setting the length
     joint_states.name_length = 4;
     joint_states.position_length = 4;
     // joint_states.velocity_length = 4;
@@ -645,7 +654,7 @@ uint8_t ConfigFunctionality::enableMotors(const char *datain, const char **datao
     return rosbot_ekf::Configuration::Response::SUCCESS;
 }
 
-//TODO change the implementation
+// TODO change the implementation
 uint8_t ConfigFunctionality::setAnimation(const char *datain, const char **dataout)
 {
 #if USE_WS2812B_ANIMATION_MANAGER
@@ -693,14 +702,14 @@ ConfigFunctionality::configuration_srv_fun_t ConfigFunctionality::findFunctional
 
 uint8_t ConfigFunctionality::resetImu(const char *datain, const char **dataout)
 {
-    //TODO implement
+    // TODO implement
     return rosbot_ekf::Configuration::Response::FAILURE;
 }
 
 uint8_t ConfigFunctionality::setMotorsAccelDeaccel(const char *datain, const char **dataout)
 {
     float accel, deaccel;
-    //TODO implement
+    // TODO implement
     return rosbot_ekf::Configuration::Response::FAILURE;
 }
 
@@ -708,7 +717,7 @@ uint8_t ConfigFunctionality::resetOdom(const char *datain, const char **dataout)
 {
     RosbotDrive &drive = RosbotDrive::getInstance();
     rk->resetRosbotOdometry(drive, odometry);
-    
+
     return rosbot_ekf::Configuration::Response::SUCCESS;
 }
 
@@ -743,7 +752,7 @@ uint8_t ConfigFunctionality::getKinematics(const char *datain, const char **data
 {
     if (rk->getKinematicsType() == KINEMATICS_TYPE_DIFF_DRIVE)
         *dataout = "DIFF";
-    else if(rk->getKinematicsType() == KINEMATICS_TYPE_MECANUM_DRIVE)
+    else if (rk->getKinematicsType() == KINEMATICS_TYPE_MECANUM_DRIVE)
         *dataout = "MEC";
     return rosbot_ekf::Configuration::Response::SUCCESS;
 }
@@ -940,7 +949,7 @@ int main()
     bool imu_init_flag = false;
     bool welcome_flag = true;
 
-    //TODO: add /diagnostic messages
+    // TODO: add /diagnostic messages
     int num_sens_init;
     if ((num_sens_init = distance_sensors.init()) > 0)
     {
@@ -1147,7 +1156,7 @@ int main()
         {
             ImuDriver::ImuMesurement *message = (ImuDriver::ImuMesurement *)evt2.value.p;
 
-            if(nh.connected())
+            if (nh.connected())
             {
                 imu_msg.header.stamp = nh.now(message->timestamp);
 
@@ -1163,7 +1172,7 @@ int main()
                 imu_msg.linear_acceleration.x = message->linear_acceleration[0];
                 imu_msg.linear_acceleration.y = message->linear_acceleration[1];
                 imu_msg.linear_acceleration.z = message->linear_acceleration[2];
-                
+
                 imu_pub->publish(&imu_msg);
             }
 
