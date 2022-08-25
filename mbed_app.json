@@ -9,8 +9,8 @@
             "events.shared-dispatch-from-application": 0,
             "events.shared-eventsize": 1024,
             "events.shared-stacksize": 2048,
-            "platform.default-serial-baud-rate": 460800,
-            "platform.stdio-baud-rate": 460800,
+            "platform.default-serial-baud-rate": 576000,
+            "platform.stdio-baud-rate": 576000,
             "drivers.uart-serial-rxbuf-size": 768,
             "drivers.uart-serial-txbuf-size": 768
         }

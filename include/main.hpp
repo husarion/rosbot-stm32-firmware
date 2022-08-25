@@ -1,5 +1,6 @@
 #pragma once
 #include <ImuDriver.h>
+#include <microros.hpp>
 #ifndef KINEMATIC_TYPE
 #define KINEMATIC_TYPE 0
 #endif
@@ -13,6 +14,9 @@ static volatile bool joint_states_enabled = true;
 #else
 static volatile bool joint_states_enabled = false;
 #endif
+
+
+static UARTSerial microros_serial(RPI_SERIAL_TX, RPI_SERIAL_RX);
 
 static volatile bool distance_sensors_enabled = false;
 static volatile bool tf_msgs_enabled = false;
@@ -32,8 +36,7 @@ static rosbot_kinematics::RosbotOdometry odometry;
 static rosbot_kinematics::DifferentialDrive diff_drive_kinematics;
 static rosbot_kinematics::MecanumDrive mecanum_drive_kinematics;
 static DigitalOut sens_power(SENS_POWER_ON, 0);
-static DigitalOut led2(LED2, 0);
-static DigitalOut led3(LED3, 0);
+
 static InterruptIn button1(BUTTON1);
 static InterruptIn button2(BUTTON2);
 static ImuDriver *imu_driver_ptr;
