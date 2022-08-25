@@ -38,9 +38,9 @@ namespace rosbot_kinematics
         custom_wheel_params.tyre_deflation = tyre_deflation;
     }
 
-    geometry_msgs::Twist RosbotKinematics::getTwist(RosbotOdometry &odom)
+    geometry_msgs__msg__Twist RosbotKinematics::getTwist(RosbotOdometry &odom)
     {
-        geometry_msgs::Twist twist{};
+        geometry_msgs__msg__Twist twist;
         twist.linear.x = odom.robot_x_vel;
         twist.linear.y = odom.robot_y_vel;
         twist.angular.z = odom.robot_angular_vel;

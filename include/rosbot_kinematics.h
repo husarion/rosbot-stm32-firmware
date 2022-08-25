@@ -2,7 +2,7 @@
 #define __ROSBOT_KINEMATICS_H__
 
 #include <RosbotDrive.h>
-#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/msg/twist.h>
 
 #define KINEMATICS_TYPE_DIFF_DRIVE 0
 #define KINEMATICS_TYPE_MECANUM_DRIVE 1
@@ -85,7 +85,7 @@ namespace rosbot_kinematics
         virtual void updateRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom, float dtime) = 0;
         virtual void resetRosbotOdometry(RosbotDrive &drive, RosbotOdometry &odom);
         virtual void calibrateOdometry(float diameter_modificator, float tyre_deflation);
-        virtual geometry_msgs::Twist getTwist(RosbotOdometry &odom);
+        virtual geometry_msgs__msg__Twist getTwist(RosbotOdometry &odom);
         virtual void setOdomParams();
     };
     class DifferentialDrive : public RosbotKinematics
