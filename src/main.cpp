@@ -280,13 +280,6 @@ int main() {
     // ros::Subscriber<std_msgs::UInt32> cmd_ser_sub("cmd_ser", &servoCallback);
     // ros::ServiceServer<rosbot_ekf::Configuration::Request, rosbot_ekf::Configuration::Response> config_srv("config", responseCallback);
 
-    // initBatteryPublisher();
-    // initPosePublisher();
-    // initVelocityPublisher();
-    // initRangePublisher();
-    // initJointStatePublisher();
-    // initImuPublisher();
-    // initButtonPublisher();
 
 #if USE_WS2812B_ANIMATION_MANAGER
     anim_manager = AnimationManager::getInstance();
