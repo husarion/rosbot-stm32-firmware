@@ -1,6 +1,8 @@
 #pragma once
 #include <ImuDriver.h>
 #include <microros.hpp>
+#include <memory_debug_message_info.hpp>
+
 #ifndef KINEMATIC_TYPE
 #define KINEMATIC_TYPE 0
 #endif
@@ -26,7 +28,7 @@ static volatile bool button2_publish_flag = false;
 
 static volatile bool is_speed_watchdog_enabled = true;
 static volatile bool is_speed_watchdog_active = false;
-static int speed_watchdog_interval = 1000;  // ms
+static uint64_t speed_watchdog_interval = 1000;  // ms
 
 static Timer odom_watchdog_timer;
 static volatile uint32_t last_speed_command_time = 0;
