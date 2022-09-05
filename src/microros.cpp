@@ -8,6 +8,7 @@ rcl_timer_t timer;
 
 rcl_publisher_t imu_pub;
 rcl_publisher_t wheels_state_pub;
+rcl_publisher_t battery_pub;
 rcl_subscription_t wheels_command_sub;
 std_msgs__msg__Float32MultiArray wheels_command_msg;
 
@@ -22,6 +23,7 @@ bool microros_init() {
 
     init_wheels_command_subscriber();
     init_imu_publisher();
+    init_battery_publisher();
     init_wheels_state_publisher();
 
     RCCHECK(rclc_timer_init_default(&timer, &support, RCL_MS_TO_NS(10),
@@ -69,6 +71,14 @@ void init_wheels_state_publisher() {
         WHEELS_STATE_TOPIC_NAME));
 }
 
+void init_battery_publisher() {
+    RCCHECK(rclc_publisher_init_default(
+        &battery_pub,
+        &node,
+        ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, BatteryState),
+        BATTERY_TOPIC_NAME));
+}
+
 void init_wheels_command_subscriber() {
     RCCHECK(rclc_subscription_init_best_effort(
         &wheels_command_sub, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32MultiArray),
@@ -81,6 +91,10 @@ void publish_wheels_state_msg(sensor_msgs__msg__JointState *msg) {
 
 void publish_imu_msg(sensor_msgs__msg__Imu *msg) {
     RCSOFTCHECK(rcl_publish(&imu_pub, msg, NULL));
+}
+
+void publish_battery_msg(sensor_msgs__msg__BatteryState *msg){
+    RCSOFTCHECK(rcl_publish(&battery_pub, msg, NULL));
 }
 
 void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg) {
@@ -114,14 +128,13 @@ void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg) {
 }
 
 void fill_imu_msg(sensor_msgs__msg__Imu *msg) {
-    char *frame_id = (char *)"wheels_state";
+    char *frame_id = (char *)"imu";
     msg->header.frame_id.data = frame_id;
 
     if (rmw_uros_epoch_synchronized()) {
         msg->header.stamp.sec = (int32_t)(rmw_uros_epoch_nanos() / 1000000000);
         msg->header.stamp.nanosec = (uint32_t)(rmw_uros_epoch_nanos() % 1000000000);
     }
-    msg->header.frame_id.data = (char *)"imu";
     msg->orientation.x = 0;
     msg->orientation.y = 0;
     msg->orientation.z = 0;
@@ -135,6 +148,18 @@ void fill_imu_msg(sensor_msgs__msg__Imu *msg) {
     for (auto i = 0u; i < 9u; ++i) {
         msg->angular_velocity_covariance[i] = msg->linear_acceleration_covariance[i] = msg->orientation_covariance[i] = msg->orientation_covariance[i + 3] = 0.0;
     }
+}
+
+void fill_battery_msg(sensor_msgs__msg__BatteryState *msg){
+    char *frame_id = (char *)"battery";
+    msg->header.frame_id.data = frame_id;
+
+    if (rmw_uros_epoch_synchronized()) {
+        msg->header.stamp.sec = (int32_t)(rmw_uros_epoch_nanos() / 1000000000);
+        msg->header.stamp.nanosec = (uint32_t)(rmw_uros_epoch_nanos() % 1000000000);
+    }
+
+    msg->power_supply_technology = sensor_msgs__msg__BatteryState__POWER_SUPPLY_TECHNOLOGY_LION;
 }
 
 void fill_wheels_command_msg(std_msgs__msg__Float32MultiArray *msg) {

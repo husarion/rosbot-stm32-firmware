@@ -26,6 +26,7 @@ static volatile bool tf_msgs_enabled = false;
 
 static volatile bool button1_publish_flag = false;
 static volatile bool button2_publish_flag = false;
+static volatile float battery_voltage = 0.0;
 
 static volatile bool is_speed_watchdog_enabled = true;
 static volatile bool is_speed_watchdog_active = false;

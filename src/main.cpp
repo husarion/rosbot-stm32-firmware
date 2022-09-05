@@ -121,6 +121,7 @@ void range_sensors_msg_handler() {
     // }
 }
 sensor_msgs__msg__Imu imu_msg;
+sensor_msgs__msg__BatteryState battery_msg;
 
 void imu_msg_handler() {
     osEvent evt2 = imu_sensor_mail_box.get(0);
@@ -146,12 +147,13 @@ void imu_msg_handler() {
     }
 }
 
-// void battery_msg_handler() {
-//     if (spin_count % 40 == 0) {
-//         // if (nh.connected())
-//         //     battery_pub->publish(&battery_state);
-//     }
-// }
+void battery_msg_handler() {
+    if (spin_count % 40 == 0) {
+        fill_battery_msg(&battery_msg);
+        battery_msg.voltage = battery_voltage;
+        publish_battery_msg(&battery_msg);
+    }
+}
 
 void buttons_msgs_handler() {
     if (button1_publish_flag) {
@@ -191,7 +193,7 @@ void wheels_state_msg_handler() {
 }
 
 void read_and_show_battery_state() {
-    // battery_state.voltage = rosbot_sensors::updateBatteryWatchdog();
+    battery_voltage = rosbot_sensors::updateBatteryWatchdog();
 }
 
 void check_speed_watchdog() {
@@ -224,7 +226,7 @@ void wheels_command_callback(const void *msgin) {
         RosbotDrive &drive = RosbotDrive::getInstance();
         NewTargetSpeed new_speed;
         new_speed.mode = MPS;
-        for(auto i = 0u; i < 4u; ++i){
+        for (auto i = 0u; i < 4u; ++i) {
             new_speed.speed[i] = msg->data.data[i] * WHEEL_RADIUS;
         }
         drive.updateTargetSpeed(new_speed);
@@ -248,7 +250,7 @@ void timer_callback(rcl_timer_t *timer, int64_t last_call_time) {
         imu_msg_handler();
         wheels_state_msg_handler();
         // buttons_msgs_handler();
-        // battery_msg_handler();
+        battery_msg_handler();
         spin_count++;
     }
 }
@@ -325,6 +327,7 @@ int main() {
     Thread odometry_thread;
     odometry_thread.start(odometry_callback);
     fill_imu_msg(&imu_msg);
+    fill_battery_msg(&battery_msg);
 
     while (1) {
         microros_spin();

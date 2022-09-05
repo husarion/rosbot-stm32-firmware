@@ -7,6 +7,7 @@
 #include <rclc/executor.h>
 #include <rclc/rclc.h>
 #include <rmw_microros/rmw_microros.h>
+#include <sensor_msgs/msg/battery_state.h>
 #include <sensor_msgs/msg/imu.h>
 #include <sensor_msgs/msg/joint_state.h>
 #include <std_msgs/msg/float32_multi_array.h>
@@ -16,6 +17,7 @@
 constexpr const char *NODE_NAME = "rosbot_stm32_firmware";
 constexpr const char *IMU_TOPIC_NAME = "imu";
 constexpr const char *WHEELS_STATE_TOPIC_NAME = "wheels_state";
+constexpr const char *BATTERY_TOPIC_NAME = "battery";
 constexpr const char *WHEELS_COMMAND_TOPIC_NAME = "wheels_command";
 
 constexpr const char *FRONT_LEFT_MOTOR_NAME = "front_left_wheel_joint";
@@ -76,7 +78,7 @@ void microros_deinit();
             led3 = 0;                       \
             ThisThread::sleep_for(100);     \
             microros_deinit();              \
-        NVIC_SystemReset();                 \
+            NVIC_SystemReset();             \
         }                                   \
     }
 
@@ -86,11 +88,14 @@ void microros_spin();
 
 void init_imu_publisher();
 void init_wheels_state_publisher();
+void init_battery_publisher();
 void init_wheels_command_subscriber();
 
 void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg);
 void fill_imu_msg(sensor_msgs__msg__Imu *msg);
-void fill_wheels_command_msg(std_msgs__msg__Float32MultiArray * msg);
+void fill_battery_msg(sensor_msgs__msg__BatteryState *msg);
+void fill_wheels_command_msg(std_msgs__msg__Float32MultiArray *msg);
 
 void publish_imu_msg(sensor_msgs__msg__Imu *imu_msg);
 void publish_wheels_state_msg(sensor_msgs__msg__JointState *msg);
+void publish_battery_msg(sensor_msgs__msg__BatteryState *msg);
