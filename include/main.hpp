@@ -1,5 +1,6 @@
 #pragma once
 #include <ImuDriver.h>
+#include <RosbotDrive.h>
 #include <microros.hpp>
 #include <memory_debug_message_info.hpp>
 
@@ -17,7 +18,7 @@ static volatile bool joint_states_enabled = true;
 static volatile bool joint_states_enabled = false;
 #endif
 
-
+constexpr float WHEEL_RADIUS = 0.0425;
 static UARTSerial microros_serial(RPI_SERIAL_TX, RPI_SERIAL_RX);
 
 static volatile bool distance_sensors_enabled = false;
