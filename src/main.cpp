@@ -226,9 +226,11 @@ void wheels_command_callback(const void *msgin) {
         RosbotDrive &drive = RosbotDrive::getInstance();
         NewTargetSpeed new_speed;
         new_speed.mode = MPS;
-        for (auto i = 0u; i < 4u; ++i) {
-            new_speed.speed[i] = msg->data.data[i] * WHEEL_RADIUS;
-        }
+        new_speed.speed[0] = msg->data.data[motor_right_front] * WHEEL_RADIUS;
+        new_speed.speed[1] = msg->data.data[motor_right_rear] * WHEEL_RADIUS;
+        new_speed.speed[2] = msg->data.data[motor_left_rear] * WHEEL_RADIUS;
+        new_speed.speed[3] = msg->data.data[motor_left_front] * WHEEL_RADIUS;
+
         drive.updateTargetSpeed(new_speed);
         last_speed_command_time = odom_watchdog_timer.read_ms();
         is_speed_watchdog_active = false;

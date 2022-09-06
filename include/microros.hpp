@@ -15,10 +15,10 @@
 #include <microros_transport/mbed_serial_transport.hpp>
 
 constexpr const char *NODE_NAME = "rosbot_stm32_firmware";
-constexpr const char *IMU_TOPIC_NAME = "imu";
-constexpr const char *WHEELS_STATE_TOPIC_NAME = "wheels_state";
+constexpr const char *IMU_TOPIC_NAME = "_imu/data_raw";
+constexpr const char *WHEELS_STATE_TOPIC_NAME = "_motors_response";
 constexpr const char *BATTERY_TOPIC_NAME = "battery";
-constexpr const char *WHEELS_COMMAND_TOPIC_NAME = "wheels_command";
+constexpr const char *WHEELS_COMMAND_TOPIC_NAME = "_motors_cmd";
 
 constexpr const char *FRONT_LEFT_MOTOR_NAME = "front_left_wheel_joint";
 constexpr const char *FRONT_RIGHT_MOTOR_NAME = "front_right_wheel_joint";
@@ -26,10 +26,10 @@ constexpr const char *REAR_LEFT_MOTOR_NAME = "rear_left_wheel_joint";
 constexpr const char *REAR_RIGHT_MOTOR_NAME = "rear_right_wheel_joint";
 
 enum Motors {
-    motor_left_front,
-    motor_right_front,
-    motor_left_rear,
     motor_right_rear,
+    motor_left_rear,
+    motor_right_front,
+    motor_left_front,
     MOTORS_COUNT
 };
 
