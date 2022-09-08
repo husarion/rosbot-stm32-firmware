@@ -122,8 +122,8 @@ void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg) {
     msg->name.data = msg_name_tab;
 
     if (rmw_uros_epoch_synchronized()) {
-        msg->header.stamp.sec = rmw_uros_epoch_millis() / 1000;
-        msg->header.stamp.nanosec = rmw_uros_epoch_nanos();
+        msg->header.stamp.sec = (int32_t)(rmw_uros_epoch_nanos() / 1000000000);
+        msg->header.stamp.nanosec = (uint32_t)(rmw_uros_epoch_nanos() % 1000000000);
     }
 }
 
