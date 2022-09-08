@@ -4,40 +4,8 @@
  * @author Husarion
  * @copyright MIT
  */
-#include <geometry_msgs/msg/twist.h>
-#include <rosbot_kinematics.h>
-#include <rosbot_sensors.h>
-
 #include <main.hpp>
-
-static const char EMPTY_STRING[] = "";
-
-static const char WELLCOME_STR[] =
-    "\n\n"
-#if defined(WELLCOME_BANNER)
-    " ______  _____  _____  _             _           __\n"
-    " | ___ \\|  _  |/  ___|| |           | |         / _|\n"
-    " | |_/ /| | | |\\ `--. | |__    ___  | |_       | |_ __      __\n"
-    " |    / | | | | `--. \\| '_ \\  / _ \\ | __|      |  _|\\ \\ /\\ / /\n"
-    " | |\\ \\ \\ \\_/ //\\__/ /| |_) || (_) || |_       | |   \\ V  V / \n"
-    " \\_| \\_| \\___/ \\____/ |_.__/  \\___/  \\__|      |_|    \\_/\\_/ \n\n"
-#endif
-    " Firmware version: " ROSBOT_FW_VERSION
-    "\n\n";
-
-#if USE_WS2812B_ANIMATION_MANAGER
-#include <AnimationManager.h>
-AnimationManager *anim_manager;
-static int parseColorStr(const char *color_str, Color_t *color_ptr) {
-    uint32_t num;
-    if (sscanf(color_str, "%*c%X", &num) != 1)
-        return 0;
-    color_ptr->b = 0xff & num;
-    color_ptr->g = 0xff & (num >> 8);
-    color_ptr->r = 0xff & (num >> 16);
-    return 1;
-}
-#endif
+#include <rosbot_sensors.h>
 
 #define MAIN_LOOP_INTERVAL_MS 10
 #define IMU_I2C_FREQUENCY 100000L
@@ -62,11 +30,9 @@ static void button2Callback() {
     button2_publish_flag = true;
 }
 
-// JointState
-const char *joint_state_name[] = {"front_left_wheel_hinge", "front_right_wheel_hinge", "rear_left_wheel_hinge", "rear_right_wheel_hinge"};
-double pos[] = {0, 0, 0, 0};
-double vel[] = {0, 0, 0, 0};
-double eff[] = {0, 0, 0, 0};
+
+static float curr_odom_calc_time = 0.0;
+static float last_odom_calc_time = 0.0;
 
 // Range
 const char *range_id[] = {"range_fr", "range_fl", "range_rr", "range_rl"};
@@ -74,54 +40,12 @@ const char *range_pub_names[] = {"range/fr", "range/fl", "range/rr", "range/rl"}
 
 static uint32_t spin_count = 1;
 
-enum states {
-    WAITING_AGENT,
-    AGENT_AVAILABLE,
-    AGENT_CONNECTED,
-    AGENT_DISCONNECTED
-} state;
-
 void range_sensors_msg_handler() {
-    // osEvent evt1 = distance_sensor_mail_box.get(0);
-    // if (evt1.status == osEventMail) {
-    //     SensorsMeasurement *message = (SensorsMeasurement *)evt1.value.p;
-    //     if (message->status == MultiDistanceSensor::ERR_I2C_FAILURE) {
-    //         err_msg++;
-    //         if (distance_sensor_commands.empty() && err_msg == 3) {
-    //             uint8_t *data = distance_sensor_commands.alloc();
-    //             *data = 2;
-    //             distance_sensor_commands.put(data);
-    //             data = distance_sensor_commands.alloc();
-    //             *data = 1;
-    //             distance_sensor_commands.put(data);
-    //             err_msg = 0;
-    //         }
-    //     } else {
-    //         err_msg = 0;
-    //         for (int i = 0; i < 4; i++) {
-    // range_msg[i].header.stamp = nh.now(message->timestamp);
-    // range_msg[i].range = message->range[i];
-    // if (nh.connected())
-    //     range_pub[i]->publish(&range_msg[i]);
-    //         }
-    //     }
-    //     distance_sensor_mail_box.free(message);
-    // }
-    // if(spin_count % 20 == 0 && distance_sensors_enabled) // ~ 5 HZ
-    // {
-    //     uint16_t range;
-    //     ros::Time t = nh.now();
-    //     for(int i=0;i<4;i++)
-    //     {
-    //         range = distance_sensors->getSensor(i)->readRangeContinuousMillimeters(false);
-    //         range_msg[i].header.stamp = t;
-    //         range_msg[i].range = (range != 65535) ? (float)range/1000.0f : -1.0f;
-    //         if(nh.connected()) range_pub[i]->publish(&range_msg[i]);
-    //     }
-    // }
+    // TODO: fill
 }
 sensor_msgs__msg__Imu imu_msg;
 sensor_msgs__msg__BatteryState battery_msg;
+sensor_msgs__msg__JointState wheels_state_msg;
 
 void imu_msg_handler() {
     osEvent evt2 = imu_sensor_mail_box.get(0);
@@ -156,38 +80,11 @@ void battery_msg_handler() {
 }
 
 void buttons_msgs_handler() {
-    if (button1_publish_flag) {
-        button1_publish_flag = false;
-        if (!button1) {
-            // button_msg.data = 1;
-            // if (nh.connected())
-            //     button_pub->publish(&button_msg);
-        }
-    }
-
-    if (button2_publish_flag) {
-        button2_publish_flag = false;
-        if (!button2) {
-            // button_msg.data = 2;
-            // if (nh.connected())
-            //     button_pub->publish(&button_msg);
-        }
-    }
+    // TODO: fill
 }
 
 void wheels_state_msg_handler() {
     if (spin_count % 5 == 0) {
-        sensor_msgs__msg__JointState wheels_state_msg;
-        fill_wheels_state_msg(&wheels_state_msg);
-        wheels_state_msg.position.data[motor_left_front] = odometry.wheel_FL_ang_pos;
-        wheels_state_msg.position.data[motor_right_front] = odometry.wheel_FR_ang_pos;
-        wheels_state_msg.position.data[motor_left_rear] = odometry.wheel_RL_ang_pos;
-        wheels_state_msg.position.data[motor_right_rear] = odometry.wheel_RR_ang_pos;
-
-        wheels_state_msg.velocity.data[motor_left_front] = odometry.wheel_FL_ang_vel;
-        wheels_state_msg.velocity.data[motor_right_front] = odometry.wheel_FR_ang_vel;
-        wheels_state_msg.velocity.data[motor_left_rear] = odometry.wheel_RL_ang_vel;
-        wheels_state_msg.velocity.data[motor_right_rear] = odometry.wheel_RR_ang_vel;
         publish_wheels_state_msg(&wheels_state_msg);
     }
 }
@@ -199,23 +96,38 @@ void read_and_show_battery_state() {
 void check_speed_watchdog() {
     if (is_speed_watchdog_enabled) {
         if (!is_speed_watchdog_active && (odom_watchdog_timer.read_ms() - last_speed_command_time) > speed_watchdog_interval) {
-            RosbotSpeed speed = {0.0, 0.0, 0.0};
             RosbotDrive &drive = RosbotDrive::getInstance();
-            rk->setRosbotSpeed(drive, speed);
+            NewTargetSpeed new_speed;
+            new_speed.mode = MPS;
+            new_speed.speed[0] = 0;
+            new_speed.speed[1] = 0;
+            new_speed.speed[2] = 0;
+            new_speed.speed[3] = 0;
+
+            drive.updateTargetSpeed(new_speed);
             is_speed_watchdog_active = true;
         }
     }
 }
 
-static float curr_odom_calc_time = 0.0;
-static float last_odom_calc_time = 0.0;
-
 void update_odometry() {
     if (spin_count % 2 == 0) {
-        curr_odom_calc_time = odom_watchdog_timer.read();
         RosbotDrive &drive = RosbotDrive::getInstance();
-        rk->updateRosbotOdometry(drive, odometry, curr_odom_calc_time - last_odom_calc_time);
+
+        float current_position[MOTORS_COUNT];
+        current_position[motor_left_front] = drive.getAngularPos(MOTOR_FL);
+        current_position[motor_right_front] = drive.getAngularPos(MOTOR_FR);
+        current_position[motor_left_rear] = drive.getAngularPos(MOTOR_RL);
+        current_position[motor_right_rear] = drive.getAngularPos(MOTOR_RR);
+
+        curr_odom_calc_time = odom_watchdog_timer.read();
+        double dt = curr_odom_calc_time - last_odom_calc_time;
         last_odom_calc_time = curr_odom_calc_time;
+
+        for (auto i = 0u; i < MOTORS_COUNT; ++i) {
+            wheels_state_msg.velocity.data[i] = (current_position[i] - wheels_state_msg.position.data[i]) / dt;
+            wheels_state_msg.position.data[i] = current_position[i];
+        }
     }
 }
 
@@ -251,27 +163,31 @@ void timer_callback(rcl_timer_t *timer, int64_t last_call_time) {
     if (timer != NULL) {
         imu_msg_handler();
         wheels_state_msg_handler();
-        // buttons_msgs_handler();
+        buttons_msgs_handler();
+        range_sensors_msg_handler();
         battery_msg_handler();
         spin_count++;
     }
 }
 
 int main() {
-    int spin_result;
-    int err_msg = 0;
-
     ThisThread::sleep_for(100);
     sens_power = 1;  // sensors power on
     ThisThread::sleep_for(100);
     odom_watchdog_timer.start();
 
-    rk->setOdomParams();
     RosbotDrive &drive = RosbotDrive::getInstance();
     MultiDistanceSensor &distance_sensors = MultiDistanceSensor::getInstance();
 
+    RosbotWheel custom_wheel_params = {
+        .radius = WHEEL_RADIUS,
+        .diameter_modificator = DIAMETER_MODIFICATOR,
+        .tyre_deflation = TYRE_DEFLATION,
+        .gear_ratio = GEAR_RATIO,
+        .encoder_cpr = ENCODER_CPR,
+        .polarity = POLARITY};
     drive.setupMotorSequence(MOTOR_FR, MOTOR_FL, MOTOR_RR, MOTOR_RL);
-    drive.init(rosbot_kinematics::custom_wheel_params, RosbotDrive::DEFAULT_REGULATOR_PARAMS);
+    drive.init(custom_wheel_params, RosbotDrive::DEFAULT_REGULATOR_PARAMS);
     drive.enable(true);
     drive.enablePidReg(true);
 
@@ -303,17 +219,11 @@ int main() {
         imu_init_flag = true;
     }
 
+    Thread odometry_thread;
+    odometry_thread.start(odometry_callback);
+
     set_microros_serial_transports(&microros_serial);
     microros_init();
-
-#if USE_WS2812B_ANIMATION_MANAGER
-    anim_manager = AnimationManager::getInstance();
-    anim_manager->init();
-#endif
-
-#if defined(MEMORY_DEBUG_INFO)
-    print_debug_info();
-#endif /* MEMORY_DEBUG_INFO */
 
     if (imu_init_flag) {
         imu_driver_ptr->start();
@@ -326,10 +236,9 @@ int main() {
         distance_sensors_enabled = true;
     }
 
-    Thread odometry_thread;
-    odometry_thread.start(odometry_callback);
     fill_imu_msg(&imu_msg);
     fill_battery_msg(&battery_msg);
+    fill_wheels_state_msg(&wheels_state_msg);
 
     while (1) {
         microros_spin();

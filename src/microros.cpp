@@ -33,7 +33,7 @@ bool microros_init() {
     RCCHECK(rclc_executor_add_timer(&executor, &timer));
     RCCHECK(rclc_executor_add_subscription(&executor, &wheels_command_sub, &wheels_command_msg,
                                            &wheels_command_callback, ON_NEW_DATA));
-    RCCHECK(rmw_uros_sync_session(1000));
+    RCCHECK(rmw_uros_sync_session(500));
     return true;
 }
 

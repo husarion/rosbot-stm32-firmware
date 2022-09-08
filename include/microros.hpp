@@ -51,7 +51,7 @@ void microros_deinit();
             led2 = 1;                        \
             led3 = 1;                        \
             for (auto i = 0u; i < 10; ++i) { \
-                ThisThread::sleep_for(500);  \
+                ThisThread::sleep_for(100);  \
                 led2 = !led2;                \
                 led3 = !led3;                \
             }                                \
@@ -70,7 +70,7 @@ void microros_deinit();
             led2 = 1;                       \
             led3 = 1;                       \
             for (auto i = 0u; i < 4; ++i) { \
-                ThisThread::sleep_for(500); \
+                ThisThread::sleep_for(50); \
                 led2 = !led2;               \
                 led3 = !led3;               \
             }                               \
