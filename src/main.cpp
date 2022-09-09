@@ -22,6 +22,16 @@ const char *imu_sensor_type_string[] = {
     "UNKNOWN"};
 char imu_description_string[64] = "";
 
+static float curr_odom_calc_time = 0.0;
+static float last_odom_calc_time = 0.0;
+
+sensor_msgs__msg__Imu imu_msg;
+sensor_msgs__msg__BatteryState battery_msg;
+sensor_msgs__msg__JointState wheels_state_msg;
+
+
+static uint32_t spin_count = 1;
+
 static void button1Callback() {
     button1_publish_flag = true;
 }
@@ -30,22 +40,9 @@ static void button2Callback() {
     button2_publish_flag = true;
 }
 
-
-static float curr_odom_calc_time = 0.0;
-static float last_odom_calc_time = 0.0;
-
-// Range
-const char *range_id[] = {"range_fr", "range_fl", "range_rr", "range_rl"};
-const char *range_pub_names[] = {"range/fr", "range/fl", "range/rr", "range/rl"};
-
-static uint32_t spin_count = 1;
-
 void range_sensors_msg_handler() {
     // TODO: fill
 }
-sensor_msgs__msg__Imu imu_msg;
-sensor_msgs__msg__BatteryState battery_msg;
-sensor_msgs__msg__JointState wheels_state_msg;
 
 void imu_msg_handler() {
     osEvent evt2 = imu_sensor_mail_box.get(0);
@@ -186,6 +183,7 @@ int main() {
         .gear_ratio = GEAR_RATIO,
         .encoder_cpr = ENCODER_CPR,
         .polarity = POLARITY};
+
     drive.setupMotorSequence(MOTOR_FR, MOTOR_FL, MOTOR_RR, MOTOR_RL);
     drive.init(custom_wheel_params, RosbotDrive::DEFAULT_REGULATOR_PARAMS);
     drive.enable(true);
@@ -198,7 +196,6 @@ int main() {
 
     bool distance_sensors_init_flag = false;
     bool imu_init_flag = false;
-    bool welcome_flag = true;
 
     // TODO: add /diagnostic messages
     int num_sens_init;

@@ -12,6 +12,9 @@ rcl_publisher_t battery_pub;
 rcl_subscription_t wheels_command_sub;
 std_msgs__msg__Float32MultiArray wheels_command_msg;
 
+// Range
+const char *range_id[] = {"range_fr", "range_fl", "range_rr", "range_rl"};
+const char *range_pub_names[] = {"range/fr", "range/fl", "range/rr", "range/rl"};
 extern void timer_callback(rcl_timer_t *timer, int64_t last_call_time);
 extern void wheels_command_callback(const void *msgin);
 
@@ -146,8 +149,11 @@ void fill_imu_msg(sensor_msgs__msg__Imu *msg) {
     msg->linear_acceleration.y = 0;
     msg->linear_acceleration.z = 0;
     for (auto i = 0u; i < 9u; ++i) {
-        msg->angular_velocity_covariance[i] = msg->linear_acceleration_covariance[i] = msg->orientation_covariance[i] = msg->orientation_covariance[i + 3] = 0.0;
+        msg->angular_velocity_covariance[i] = msg->linear_acceleration_covariance[i] = msg->orientation_covariance[i] = 0.0;
     }
+    msg->orientation_covariance[9] = 0.0;
+    msg->orientation_covariance[10] = 0.0;
+    msg->orientation_covariance[11] = 0.0;
 }
 
 void fill_battery_msg(sensor_msgs__msg__BatteryState *msg){

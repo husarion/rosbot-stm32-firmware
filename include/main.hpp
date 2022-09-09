@@ -21,7 +21,6 @@ static volatile bool joint_states_enabled = false;
 static UARTSerial microros_serial(RPI_SERIAL_TX, RPI_SERIAL_RX);
 
 static volatile bool distance_sensors_enabled = false;
-static volatile bool tf_msgs_enabled = false;
 
 static volatile bool button1_publish_flag = false;
 static volatile bool button2_publish_flag = false;
