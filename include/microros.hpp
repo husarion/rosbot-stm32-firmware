@@ -48,16 +48,7 @@ void microros_deinit();
     {                                        \
         rcl_ret_t temp_rc = fn;              \
         if ((temp_rc != RCL_RET_OK)) {       \
-            led2 = 1;                        \
-            led3 = 1;                        \
-            for (auto i = 0u; i < 10; ++i) { \
-                ThisThread::sleep_for(100);  \
-                led2 = !led2;                \
-                led3 = !led3;                \
-            }                                \
             led2 = 0;                        \
-            led3 = 0;                        \
-            ThisThread::sleep_for(100);      \
             microros_deinit();               \
             NVIC_SystemReset();              \
         }                                    \
@@ -67,16 +58,7 @@ void microros_deinit();
     {                                       \
         rcl_ret_t temp_rc = fn;             \
         if ((temp_rc != RCL_RET_OK)) {      \
-            led2 = 1;                       \
-            led3 = 1;                       \
-            for (auto i = 0u; i < 4; ++i) { \
-                ThisThread::sleep_for(50); \
-                led2 = !led2;               \
-                led3 = !led3;               \
-            }                               \
             led2 = 0;                       \
-            led3 = 0;                       \
-            ThisThread::sleep_for(100);     \
             microros_deinit();              \
             NVIC_SystemReset();             \
         }                                   \

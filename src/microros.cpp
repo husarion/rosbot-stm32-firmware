@@ -36,8 +36,8 @@ bool microros_init() {
     RCCHECK(rclc_executor_add_timer(&executor, &timer));
     RCCHECK(rclc_executor_add_subscription(&executor, &wheels_command_sub, &wheels_command_msg,
                                            &wheels_command_callback, ON_NEW_DATA));
-    RCCHECK(rmw_uros_sync_session(500));
-    return true;
+
+    return rmw_uros_sync_session(2000) == RCL_RET_OK? true : false;
 }
 
 void microros_deinit() {
@@ -67,7 +67,7 @@ void init_imu_publisher() {
 }
 
 void init_wheels_state_publisher() {
-    RCCHECK(rclc_publisher_init_default(
+    RCCHECK(rclc_publisher_init_best_effort(
         &wheels_state_pub,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, JointState),
@@ -96,7 +96,7 @@ void publish_imu_msg(sensor_msgs__msg__Imu *msg) {
     RCSOFTCHECK(rcl_publish(&imu_pub, msg, NULL));
 }
 
-void publish_battery_msg(sensor_msgs__msg__BatteryState *msg){
+void publish_battery_msg(sensor_msgs__msg__BatteryState *msg) {
     RCSOFTCHECK(rcl_publish(&battery_pub, msg, NULL));
 }
 
@@ -156,7 +156,7 @@ void fill_imu_msg(sensor_msgs__msg__Imu *msg) {
     msg->orientation_covariance[11] = 0.0;
 }
 
-void fill_battery_msg(sensor_msgs__msg__BatteryState *msg){
+void fill_battery_msg(sensor_msgs__msg__BatteryState *msg) {
     char *frame_id = (char *)"battery";
     msg->header.frame_id.data = frame_id;
 
@@ -169,8 +169,8 @@ void fill_battery_msg(sensor_msgs__msg__BatteryState *msg){
 }
 
 void fill_wheels_command_msg(std_msgs__msg__Float32MultiArray *msg) {
-    static float data[4] = {0, 0, 0, 0};
-    msg->data.capacity = 4;
+    static float data[MOTORS_COUNT] = {0, 0, 0, 0};
+    msg->data.capacity = MOTORS_COUNT;
     msg->data.size = 0;
     msg->data.data = (float *)data;
 }

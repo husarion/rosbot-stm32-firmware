@@ -49,7 +49,6 @@ void imu_msg_handler() {
 
     if (evt2.status == osEventMail) {
         ImuDriver::ImuMesurement *message = (ImuDriver::ImuMesurement *)evt2.value.p;
-        led2 = !led2;
         fill_imu_msg(&imu_msg);
         imu_msg.orientation.y = message->orientation[1];
         imu_msg.orientation.z = message->orientation[2];
@@ -219,9 +218,6 @@ int main() {
     Thread odometry_thread;
     odometry_thread.start(odometry_callback);
 
-    set_microros_serial_transports(&microros_serial);
-    microros_init();
-
     if (imu_init_flag) {
         imu_driver_ptr->start();
     }
@@ -232,6 +228,18 @@ int main() {
         distance_sensor_commands.put(data);
         distance_sensors_enabled = true;
     }
+
+    read_and_show_battery_state();
+
+    set_microros_serial_transports(&microros_serial);
+    if(not microros_init()){
+        led3 = 1;
+        ThisThread::sleep_for(1000);
+        microros_deinit();
+        led2 = 0;
+        NVIC_SystemReset();
+    }
+    led2 = 1;
 
     fill_imu_msg(&imu_msg);
     fill_battery_msg(&battery_msg);

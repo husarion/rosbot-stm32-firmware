@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - 'main'
+      - 'ros2'
   pull_request:
     branches:
-      - 'main'
+      - 'ros2'
     types: [assigned, opened, synchronize, reopened]
 
 jobs:
@@ -17,22 +17,21 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-      
+
       - name: Installing platformio
         run: pip3 install -U platformio
 
-      - name: Build current project using platformio 
+      - name: Build current project using platformio
         run: |
           pio lib install
           pio run
-      
+
       - name: Prepare firmware files
         id: prepare
         run: |
           echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
           mkdir out
-          cp ${{ github.workspace }}/.pio/build/core2_diff/firmware.bin out/firmware_diff.bin
-          cp ${{ github.workspace }}/.pio/build/core2_mec/firmware.bin out/firmware_mec.bin
+          cp ${{ github.workspace }}/.pio/build/core2/firmware.bin out/firmware.bin
 
       - name: Upload firmware files
         uses: actions/upload-artifact@v2
