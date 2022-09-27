@@ -27,10 +27,10 @@ constexpr const char *REAR_LEFT_MOTOR_NAME = "rear_left_wheel_joint";
 constexpr const char *REAR_RIGHT_MOTOR_NAME = "rear_right_wheel_joint";
 
 enum Ranges {
-    range_right_rear,
-    range_left_rear,
     range_right_front,
     range_left_front,
+    range_right_rear,
+    range_left_rear,
     RANGE_COUNT
 };
 

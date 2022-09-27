@@ -12,8 +12,8 @@ rcl_publisher_t battery_pub;
 rcl_publisher_t range_pubs[RANGE_COUNT];
 rcl_subscription_t wheels_command_sub;
 std_msgs__msg__Float32MultiArray wheels_command_msg;
-const char *range_id[] = {"range_right_rear", "range_left_rear", "range_right_front", "range_left_front"};
-const char *range_pub_names[] = {"range/right_rear", "range/left_rear", "range/right_front", "range/left_front"};
+const char *range_frame_names[] = {"range_right_front", "range_left_front", "range_right_rear", "range_left_rear"};
+const char *range_pub_names[] = {"range/right_front", "range/left_front", "range/right_rear", "range/left_rear"};
 
 extern void timer_callback(rcl_timer_t *timer, int64_t last_call_time);
 extern void wheels_command_callback(const void *msgin);
@@ -189,7 +189,7 @@ void fill_wheels_command_msg(std_msgs__msg__Float32MultiArray *msg) {
 }
 
 void fill_range_msg(sensor_msgs__msg__Range *msg, uint8_t id) {
-    msg->header.frame_id = micro_ros_string_utilities_set(msg->header.frame_id, range_pub_names[id]);
+    msg->header.frame_id = micro_ros_string_utilities_set(msg->header.frame_id, range_frame_names[id]);
 
     if (rmw_uros_epoch_synchronized()) {
         msg->header.stamp.sec = (int32_t)(rmw_uros_epoch_nanos() / 1000000000);
