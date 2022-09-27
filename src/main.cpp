@@ -4,8 +4,9 @@
  * @author Husarion
  * @copyright MIT
  */
-#include <main.hpp>
 #include <rosbot_sensors.h>
+
+#include <main.hpp>
 
 #define MAIN_LOOP_INTERVAL_MS 10
 #define IMU_I2C_FREQUENCY 100000L
@@ -28,7 +29,7 @@ static float last_odom_calc_time = 0.0;
 sensor_msgs__msg__Imu imu_msg;
 sensor_msgs__msg__BatteryState battery_msg;
 sensor_msgs__msg__JointState wheels_state_msg;
-
+sensor_msgs__msg__Range range_msgs[RANGE_COUNT];
 
 static uint32_t spin_count = 1;
 
@@ -41,7 +42,18 @@ static void button2Callback() {
 }
 
 void range_sensors_msg_handler() {
-    // TODO: fill
+    osEvent evt1 = distance_sensor_mail_box.get(0);
+    if (evt1.status == osEventMail) {
+        SensorsMeasurement *message = (SensorsMeasurement *)evt1.value.p;
+        for (auto i = 0u; i < RANGE_COUNT; ++i) {
+            fill_range_msg(&range_msgs[i], i);
+            range_msgs[i].range = message->range[i];
+            publish_range_msg(&range_msgs[i], i);
+        }
+
+        distance_sensor_mail_box.free(message);
+        led3 = !led3;
+    }
 }
 
 void imu_msg_handler() {
@@ -232,7 +244,7 @@ int main() {
     read_and_show_battery_state();
 
     set_microros_serial_transports(&microros_serial);
-    if(not microros_init()){
+    if (not microros_init()) {
         led3 = 1;
         ThisThread::sleep_for(1000);
         microros_deinit();
@@ -244,6 +256,9 @@ int main() {
     fill_imu_msg(&imu_msg);
     fill_battery_msg(&battery_msg);
     fill_wheels_state_msg(&wheels_state_msg);
+    for (auto i = 0u; i < RANGE_COUNT; ++i) {
+        fill_range_msg(&range_msgs[i], i);
+    }
 
     while (1) {
         microros_spin();

@@ -9,12 +9,12 @@ rcl_timer_t timer;
 rcl_publisher_t imu_pub;
 rcl_publisher_t wheels_state_pub;
 rcl_publisher_t battery_pub;
+rcl_publisher_t range_pubs[RANGE_COUNT];
 rcl_subscription_t wheels_command_sub;
 std_msgs__msg__Float32MultiArray wheels_command_msg;
+const char *range_id[] = {"range_right_rear", "range_left_rear", "range_right_front", "range_left_front"};
+const char *range_pub_names[] = {"range/right_rear", "range/left_rear", "range/right_front", "range/left_front"};
 
-// Range
-const char *range_id[] = {"range_fr", "range_fl", "range_rr", "range_rl"};
-const char *range_pub_names[] = {"range/fr", "range/fl", "range/rr", "range/rl"};
 extern void timer_callback(rcl_timer_t *timer, int64_t last_call_time);
 extern void wheels_command_callback(const void *msgin);
 
@@ -28,16 +28,17 @@ bool microros_init() {
     init_imu_publisher();
     init_battery_publisher();
     init_wheels_state_publisher();
+    init_range_publishers();
 
     RCCHECK(rclc_timer_init_default(&timer, &support, RCL_MS_TO_NS(10),
                                     timer_callback));
 
-    RCCHECK(rclc_executor_init(&executor, &support.context, 3, &rcl_allocator));
+    RCCHECK(rclc_executor_init(&executor, &support.context, 5, &rcl_allocator));
     RCCHECK(rclc_executor_add_timer(&executor, &timer));
     RCCHECK(rclc_executor_add_subscription(&executor, &wheels_command_sub, &wheels_command_msg,
                                            &wheels_command_callback, ON_NEW_DATA));
 
-    return rmw_uros_sync_session(2000) == RCL_RET_OK? true : false;
+    return rmw_uros_sync_session(2000) == RCL_RET_OK ? true : false;
 }
 
 void microros_deinit() {
@@ -82,6 +83,16 @@ void init_battery_publisher() {
         BATTERY_TOPIC_NAME));
 }
 
+void init_range_publishers() {
+    for (auto i = 0u; i < RANGE_COUNT; ++i) {
+        RCCHECK(rclc_publisher_init_best_effort(
+            &range_pubs[i],
+            &node,
+            ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Range),
+            range_pub_names[i]));
+    }
+}
+
 void init_wheels_command_subscriber() {
     RCCHECK(rclc_subscription_init_best_effort(
         &wheels_command_sub, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32MultiArray),
@@ -100,18 +111,21 @@ void publish_battery_msg(sensor_msgs__msg__BatteryState *msg) {
     RCSOFTCHECK(rcl_publish(&battery_pub, msg, NULL));
 }
 
+void publish_range_msg(sensor_msgs__msg__Range *msg, uint8_t id) {
+    RCSOFTCHECK(rcl_publish(&range_pubs[id], msg, NULL));
+}
+
 void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg) {
     static double msg_data_tab[MOTORS_STATE_COUNT][MOTORS_COUNT];
     static rosidl_runtime_c__String msg_name_tab[MOTORS_COUNT];
-    char *frame_id = (char *)"wheels_state";
-    msg->header.frame_id.data = frame_id;
+    msg->header.frame_id = micro_ros_string_utilities_set(msg->header.frame_id, "wheels_state");
+
     msg->position.data = msg_data_tab[motor_state_position];
     msg->position.capacity = msg->position.size = MOTORS_COUNT;
     msg->velocity.data = msg_data_tab[motor_state_velocity];
     msg->velocity.capacity = msg->velocity.size = MOTORS_COUNT;
     msg->effort.data = msg_data_tab[motor_state_effort];
     msg->effort.capacity = msg->effort.size = MOTORS_COUNT;
-    msg->header.frame_id.capacity = msg->header.frame_id.size = strlen((const char *)frame_id);
 
     msg_name_tab->capacity = msg_name_tab->size = MOTORS_COUNT;
     msg_name_tab[motor_left_front].data = (char *)FRONT_LEFT_MOTOR_NAME;
@@ -131,8 +145,8 @@ void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg) {
 }
 
 void fill_imu_msg(sensor_msgs__msg__Imu *msg) {
-    char *frame_id = (char *)"imu";
-    msg->header.frame_id.data = frame_id;
+    msg->header.frame_id = micro_ros_string_utilities_set(msg->header.frame_id, "imu");
+
 
     if (rmw_uros_epoch_synchronized()) {
         msg->header.stamp.sec = (int32_t)(rmw_uros_epoch_nanos() / 1000000000);
@@ -157,8 +171,7 @@ void fill_imu_msg(sensor_msgs__msg__Imu *msg) {
 }
 
 void fill_battery_msg(sensor_msgs__msg__BatteryState *msg) {
-    char *frame_id = (char *)"battery";
-    msg->header.frame_id.data = frame_id;
+    msg->header.frame_id = micro_ros_string_utilities_set(msg->header.frame_id, "battery");
 
     if (rmw_uros_epoch_synchronized()) {
         msg->header.stamp.sec = (int32_t)(rmw_uros_epoch_nanos() / 1000000000);
@@ -173,4 +186,19 @@ void fill_wheels_command_msg(std_msgs__msg__Float32MultiArray *msg) {
     msg->data.capacity = MOTORS_COUNT;
     msg->data.size = 0;
     msg->data.data = (float *)data;
+}
+
+void fill_range_msg(sensor_msgs__msg__Range *msg, uint8_t id) {
+    msg->header.frame_id = micro_ros_string_utilities_set(msg->header.frame_id, range_pub_names[id]);
+
+    if (rmw_uros_epoch_synchronized()) {
+        msg->header.stamp.sec = (int32_t)(rmw_uros_epoch_nanos() / 1000000000);
+        msg->header.stamp.nanosec = (uint32_t)(rmw_uros_epoch_nanos() % 1000000000);
+    }
+
+    msg->radiation_type = sensor_msgs__msg__Range__INFRARED;
+    msg->field_of_view = 0.26;
+    msg->min_range = 0.03;
+    msg->max_range = 0.90;
+    msg->range = 0.0;
 }

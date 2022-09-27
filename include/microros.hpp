@@ -10,6 +10,7 @@
 #include <sensor_msgs/msg/battery_state.h>
 #include <sensor_msgs/msg/imu.h>
 #include <sensor_msgs/msg/joint_state.h>
+#include <sensor_msgs/msg/range.h>
 #include <std_msgs/msg/float32_multi_array.h>
 
 #include <microros_transport/mbed_serial_transport.hpp>
@@ -24,6 +25,14 @@ constexpr const char *FRONT_LEFT_MOTOR_NAME = "front_left_wheel_joint";
 constexpr const char *FRONT_RIGHT_MOTOR_NAME = "front_right_wheel_joint";
 constexpr const char *REAR_LEFT_MOTOR_NAME = "rear_left_wheel_joint";
 constexpr const char *REAR_RIGHT_MOTOR_NAME = "rear_right_wheel_joint";
+
+enum Ranges {
+    range_right_rear,
+    range_left_rear,
+    range_right_front,
+    range_left_front,
+    RANGE_COUNT
+};
 
 enum Motors {
     motor_right_rear,
@@ -71,13 +80,17 @@ void microros_spin();
 void init_imu_publisher();
 void init_wheels_state_publisher();
 void init_battery_publisher();
+void init_range_publishers();
 void init_wheels_command_subscriber();
 
 void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg);
 void fill_imu_msg(sensor_msgs__msg__Imu *msg);
 void fill_battery_msg(sensor_msgs__msg__BatteryState *msg);
 void fill_wheels_command_msg(std_msgs__msg__Float32MultiArray *msg);
+void fill_range_msg(sensor_msgs__msg__Range *msg, uint8_t id);
+
 
 void publish_imu_msg(sensor_msgs__msg__Imu *imu_msg);
 void publish_wheels_state_msg(sensor_msgs__msg__JointState *msg);
 void publish_battery_msg(sensor_msgs__msg__BatteryState *msg);
+void publish_range_msg(sensor_msgs__msg__Range *msg, uint8_t id);
