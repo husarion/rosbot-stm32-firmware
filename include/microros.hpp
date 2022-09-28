@@ -49,46 +49,51 @@ enum MotorsState {
     MOTORS_STATE_COUNT
 };
 
+enum AgentStates {
+    WAITING_AGENT,
+    AGENT_AVAILABLE,
+    AGENT_CONNECTED,
+    AGENT_DISCONNECTED
+};
+
 static DigitalOut led2(LED2, 0);
 static DigitalOut led3(LED3, 0);
 void microros_deinit();
 
-#define RCCHECK(fn)                          \
-    {                                        \
-        rcl_ret_t temp_rc = fn;              \
-        if ((temp_rc != RCL_RET_OK)) {       \
-            led2 = 0;                        \
-            microros_deinit();               \
-            NVIC_SystemReset();              \
-        }                                    \
-    }
+#define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){return false;}}
+#define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){led3 = 1;}}
 
-#define RCSOFTCHECK(fn)                     \
-    {                                       \
-        rcl_ret_t temp_rc = fn;             \
-        if ((temp_rc != RCL_RET_OK)) {      \
-            led2 = 0;                       \
-            microros_deinit();              \
-            NVIC_SystemReset();             \
-        }                                   \
-    }
+
+
+#define EXECUTE_EVERY_N_MS(MS, X)          \
+    do {                                   \
+        static volatile int64_t init = -1; \
+        if (init == -1) {                  \
+            init = uxr_millis();           \
+        }                                  \
+        if (uxr_millis() - init > MS) {    \
+            X;                             \
+            init = uxr_millis();           \
+        }                                  \
+    } while (0)
+
+void error_loop();
 
 bool microros_init();
 void microros_deinit();
-void microros_spin();
+bool microros_spin();
 
-void init_imu_publisher();
-void init_wheels_state_publisher();
-void init_battery_publisher();
-void init_range_publishers();
-void init_wheels_command_subscriber();
+bool init_imu_publisher();
+bool init_wheels_state_publisher();
+bool init_battery_publisher();
+bool init_range_publishers();
+bool init_wheels_command_subscriber();
 
 void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg);
 void fill_imu_msg(sensor_msgs__msg__Imu *msg);
 void fill_battery_msg(sensor_msgs__msg__BatteryState *msg);
 void fill_wheels_command_msg(std_msgs__msg__Float32MultiArray *msg);
 void fill_range_msg(sensor_msgs__msg__Range *msg, uint8_t id);
-
 
 void publish_imu_msg(sensor_msgs__msg__Imu *imu_msg);
 void publish_wheels_state_msg(sensor_msgs__msg__JointState *msg);

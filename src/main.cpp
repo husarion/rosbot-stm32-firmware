@@ -52,7 +52,6 @@ void range_sensors_msg_handler() {
         }
 
         distance_sensor_mail_box.free(message);
-        led3 = !led3;
     }
 }
 
@@ -141,8 +140,7 @@ void update_odometry() {
 
 void wheels_command_callback(const void *msgin) {
     const std_msgs__msg__Float32MultiArray *msg = (const std_msgs__msg__Float32MultiArray *)msgin;
-    if (msg->data.size == 4) {
-        led3 = !led3;
+    if (not msg == NULL and msg->data.size == 4) {
         RosbotDrive &drive = RosbotDrive::getInstance();
         NewTargetSpeed new_speed;
         new_speed.mode = MPS;
@@ -169,6 +167,7 @@ void odometry_callback() {
 void timer_callback(rcl_timer_t *timer, int64_t last_call_time) {
     RCLC_UNUSED(last_call_time);
     if (timer != NULL) {
+        led3 = !led3;
         imu_msg_handler();
         wheels_state_msg_handler();
         buttons_msgs_handler();
@@ -244,14 +243,19 @@ int main() {
     read_and_show_battery_state();
 
     set_microros_serial_transports(&microros_serial);
+    while (not rmw_uros_ping_agent(100, 1) == RMW_RET_OK) {
+        read_and_show_battery_state();
+        ThisThread::sleep_for(100);
+    }
+
     if (not microros_init()) {
-        led3 = 1;
-        ThisThread::sleep_for(1000);
         microros_deinit();
-        led2 = 0;
+        led2 = 1;
+        led3 = 1;
+        ThisThread::sleep_for(2000);
+
         NVIC_SystemReset();
     }
-    led2 = 1;
 
     fill_imu_msg(&imu_msg);
     fill_battery_msg(&battery_msg);
@@ -260,7 +264,18 @@ int main() {
         fill_range_msg(&range_msgs[i], i);
     }
 
-    while (1) {
+    std::size_t ping_count = 0;
+    AgentStates state = AGENT_CONNECTED;
+    while (state == AGENT_CONNECTED) {
+        EXECUTE_EVERY_N_MS(2000, state = (RMW_RET_OK == rmw_uros_ping_agent(200, 5)) ? AGENT_CONNECTED : AGENT_DISCONNECTED;);
         microros_spin();
+        led2 = 1;
     }
+    led3 = 0;
+    for (int i = 0; i < 10; ++i) {
+        led2 = !led2;
+        ThisThread::sleep_for(200);
+    }
+    microros_deinit();
+    NVIC_SystemReset();
 }

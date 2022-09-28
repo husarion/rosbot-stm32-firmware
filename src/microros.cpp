@@ -23,12 +23,13 @@ bool microros_init() {
     rcl_allocator = rcl_get_default_allocator();
     RCCHECK(rclc_support_init(&support, 0, NULL, &rcl_allocator));
     RCCHECK(rclc_node_init_default(&node, NODE_NAME, "", &support));
-
-    init_wheels_command_subscriber();
-    init_imu_publisher();
-    init_battery_publisher();
-    init_wheels_state_publisher();
-    init_range_publishers();
+    if (not init_wheels_command_subscriber() or
+        not init_wheels_state_publisher() or
+        not init_imu_publisher() or
+        not init_battery_publisher() or
+        not init_range_publishers()) {
+        return false;
+    }
 
     RCCHECK(rclc_timer_init_default(&timer, &support, RCL_MS_TO_NS(10),
                                     timer_callback));
@@ -38,7 +39,8 @@ bool microros_init() {
     RCCHECK(rclc_executor_add_subscription(&executor, &wheels_command_sub, &wheels_command_msg,
                                            &wheels_command_callback, ON_NEW_DATA));
 
-    return rmw_uros_sync_session(2000) == RCL_RET_OK ? true : false;
+    RCCHECK(rmw_uros_sync_session(1000));
+    return true;
 }
 
 void microros_deinit() {
@@ -48,42 +50,48 @@ void microros_deinit() {
     (rcl_subscription_fini(&wheels_command_sub, &node));
     (rcl_publisher_fini(&wheels_state_pub, &node));
     (rcl_publisher_fini(&imu_pub, &node));
+    (rcl_publisher_fini(&battery_pub, &node));
+    for (auto i = 0u; i < RANGE_COUNT; ++i) {
+        (rcl_publisher_fini(&range_pubs[i], &node));
+    }
+
     (rclc_executor_fini(&executor));
     (rcl_node_fini(&node));
 }
 
-void microros_spin() {
-    if (rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)) != RCL_RET_OK) {
-        microros_deinit();
-        NVIC_SystemReset();
-    }
+bool microros_spin() {
+    RCCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
+    return true;
 }
 
-void init_imu_publisher() {
+bool init_imu_publisher() {
     RCCHECK(rclc_publisher_init_best_effort(
         &imu_pub,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Imu),
         IMU_TOPIC_NAME));
+    return true;
 }
 
-void init_wheels_state_publisher() {
+bool init_wheels_state_publisher() {
     RCCHECK(rclc_publisher_init_best_effort(
         &wheels_state_pub,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, JointState),
         WHEELS_STATE_TOPIC_NAME));
+    return true;
 }
 
-void init_battery_publisher() {
+bool init_battery_publisher() {
     RCCHECK(rclc_publisher_init_default(
         &battery_pub,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, BatteryState),
         BATTERY_TOPIC_NAME));
+    return true;
 }
 
-void init_range_publishers() {
+bool init_range_publishers() {
     for (auto i = 0u; i < RANGE_COUNT; ++i) {
         RCCHECK(rclc_publisher_init_best_effort(
             &range_pubs[i],
@@ -91,12 +99,14 @@ void init_range_publishers() {
             ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Range),
             range_pub_names[i]));
     }
+    return true;
 }
 
-void init_wheels_command_subscriber() {
+bool init_wheels_command_subscriber() {
     RCCHECK(rclc_subscription_init_best_effort(
         &wheels_command_sub, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32MultiArray),
         WHEELS_COMMAND_TOPIC_NAME));
+    return true;
 }
 
 void publish_wheels_state_msg(sensor_msgs__msg__JointState *msg) {
@@ -146,7 +156,6 @@ void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg) {
 
 void fill_imu_msg(sensor_msgs__msg__Imu *msg) {
     msg->header.frame_id = micro_ros_string_utilities_set(msg->header.frame_id, "imu");
-
 
     if (rmw_uros_epoch_synchronized()) {
         msg->header.stamp.sec = (int32_t)(rmw_uros_epoch_nanos() / 1000000000);
