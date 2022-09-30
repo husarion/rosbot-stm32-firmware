@@ -9,11 +9,14 @@ rcl_timer_t timer;
 rcl_publisher_t imu_pub;
 rcl_publisher_t wheels_state_pub;
 rcl_publisher_t battery_pub;
-rcl_publisher_t range_pubs[RANGE_COUNT];
+rcl_publisher_t range_pubs[RANGES_COUNT];
+rcl_publisher_t buttons_pubs[BUTTONS_COUNT];
+
 rcl_subscription_t wheels_command_sub;
 std_msgs__msg__Float32MultiArray wheels_command_msg;
 const char *range_frame_names[] = {"range_right_front", "range_left_front", "range_right_rear", "range_left_rear"};
 const char *range_pub_names[] = {"range/right_front", "range/left_front", "range/right_rear", "range/left_rear"};
+const char *buttons_pub_names[] = {"button/left", "button/right"};
 
 extern void timer_callback(rcl_timer_t *timer, int64_t last_call_time);
 extern void wheels_command_callback(const void *msgin);
@@ -27,7 +30,8 @@ bool microros_init() {
         not init_wheels_state_publisher() or
         not init_imu_publisher() or
         not init_battery_publisher() or
-        not init_range_publishers()) {
+        not init_range_publishers() or
+        not init_button_publishers()) {
         return false;
     }
 
@@ -51,8 +55,12 @@ void microros_deinit() {
     (rcl_publisher_fini(&wheels_state_pub, &node));
     (rcl_publisher_fini(&imu_pub, &node));
     (rcl_publisher_fini(&battery_pub, &node));
-    for (auto i = 0u; i < RANGE_COUNT; ++i) {
+    for (auto i = 0u; i < RANGES_COUNT; ++i) {
         (rcl_publisher_fini(&range_pubs[i], &node));
+    }
+
+    for (auto i = 0u; i < BUTTONS_COUNT; ++i) {
+        (rcl_publisher_fini(&buttons_pubs[i], &node));
     }
 
     (rclc_executor_fini(&executor));
@@ -92,12 +100,23 @@ bool init_battery_publisher() {
 }
 
 bool init_range_publishers() {
-    for (auto i = 0u; i < RANGE_COUNT; ++i) {
+    for (auto i = 0u; i < RANGES_COUNT; ++i) {
         RCCHECK(rclc_publisher_init_best_effort(
             &range_pubs[i],
             &node,
             ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Range),
             range_pub_names[i]));
+    }
+    return true;
+}
+
+bool init_button_publishers() {
+    for (auto i = 0u; i < BUTTONS_COUNT; ++i) {
+        RCCHECK(rclc_publisher_init_best_effort(
+            &buttons_pubs[i],
+            &node,
+            ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt16),
+            buttons_pub_names[i]));
     }
     return true;
 }
@@ -123,6 +142,10 @@ void publish_battery_msg(sensor_msgs__msg__BatteryState *msg) {
 
 void publish_range_msg(sensor_msgs__msg__Range *msg, uint8_t id) {
     RCSOFTCHECK(rcl_publish(&range_pubs[id], msg, NULL));
+}
+
+void publish_button_msg(std_msgs__msg__UInt16 *msg, uint8_t id) {
+    RCSOFTCHECK(rcl_publish(&buttons_pubs[id], msg, NULL));
 }
 
 void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg) {

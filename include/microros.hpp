@@ -12,7 +12,7 @@
 #include <sensor_msgs/msg/joint_state.h>
 #include <sensor_msgs/msg/range.h>
 #include <std_msgs/msg/float32_multi_array.h>
-
+#include <std_msgs/msg/u_int16.h>
 #include <microros_transport/mbed_serial_transport.hpp>
 
 constexpr const char *NODE_NAME = "rosbot_stm32_firmware";
@@ -26,12 +26,18 @@ constexpr const char *FRONT_RIGHT_MOTOR_NAME = "front_right_wheel_joint";
 constexpr const char *REAR_LEFT_MOTOR_NAME = "rear_left_wheel_joint";
 constexpr const char *REAR_RIGHT_MOTOR_NAME = "rear_right_wheel_joint";
 
+enum Buttons{
+    button_left,
+    button_right,
+    BUTTONS_COUNT
+};
+
 enum Ranges {
     range_right_front,
     range_left_front,
     range_right_rear,
     range_left_rear,
-    RANGE_COUNT
+    RANGES_COUNT
 };
 
 enum Motors {
@@ -88,6 +94,7 @@ bool init_wheels_state_publisher();
 bool init_battery_publisher();
 bool init_range_publishers();
 bool init_wheels_command_subscriber();
+bool init_button_publishers();
 
 void fill_wheels_state_msg(sensor_msgs__msg__JointState *msg);
 void fill_imu_msg(sensor_msgs__msg__Imu *msg);
@@ -99,3 +106,4 @@ void publish_imu_msg(sensor_msgs__msg__Imu *imu_msg);
 void publish_wheels_state_msg(sensor_msgs__msg__JointState *msg);
 void publish_battery_msg(sensor_msgs__msg__BatteryState *msg);
 void publish_range_msg(sensor_msgs__msg__Range *msg, uint8_t id);
+void publish_button_msg(std_msgs__msg__UInt16 *msg, uint8_t id);

@@ -29,7 +29,9 @@ static float last_odom_calc_time = 0.0;
 sensor_msgs__msg__Imu imu_msg;
 sensor_msgs__msg__BatteryState battery_msg;
 sensor_msgs__msg__JointState wheels_state_msg;
-sensor_msgs__msg__Range range_msgs[RANGE_COUNT];
+sensor_msgs__msg__Range range_msgs[RANGES_COUNT];
+std_msgs__msg__UInt16 button_msgs[BUTTONS_COUNT];
+
 
 static uint32_t spin_count = 1;
 
@@ -45,7 +47,7 @@ void range_sensors_msg_handler() {
     osEvent evt1 = distance_sensor_mail_box.get(0);
     if (evt1.status == osEventMail) {
         SensorsMeasurement *message = (SensorsMeasurement *)evt1.value.p;
-        for (auto i = 0u; i < RANGE_COUNT; ++i) {
+        for (auto i = 0u; i < RANGES_COUNT; ++i) {
             fill_range_msg(&range_msgs[i], i);
             range_msgs[i].range = message->range[i];
             publish_range_msg(&range_msgs[i], i);
@@ -86,8 +88,18 @@ void battery_msg_handler() {
     }
 }
 
-void buttons_msgs_handler() {
-    // TODO: fill
+void button_msgs_handler() {
+    if(button1_publish_flag){
+        button_msgs[0].data = 1;
+        button1_publish_flag = false;
+        publish_button_msg(&button_msgs[0], 0);
+    }
+
+    if(button2_publish_flag){
+        button_msgs[1].data = 1;
+        button2_publish_flag = false;
+        publish_button_msg(&button_msgs[1], 1);
+    }
 }
 
 void wheels_state_msg_handler() {
@@ -170,9 +182,10 @@ void timer_callback(rcl_timer_t *timer, int64_t last_call_time) {
         led3 = !led3;
         imu_msg_handler();
         wheels_state_msg_handler();
-        buttons_msgs_handler();
+        button_msgs_handler();
         range_sensors_msg_handler();
         battery_msg_handler();
+        button_msgs_handler();
         spin_count++;
     }
 }
@@ -260,7 +273,7 @@ int main() {
     fill_imu_msg(&imu_msg);
     fill_battery_msg(&battery_msg);
     fill_wheels_state_msg(&wheels_state_msg);
-    for (auto i = 0u; i < RANGE_COUNT; ++i) {
+    for (auto i = 0u; i < RANGES_COUNT; ++i) {
         fill_range_msg(&range_msgs[i], i);
     }
 
