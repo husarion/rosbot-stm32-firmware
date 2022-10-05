@@ -14,7 +14,7 @@ RUN useradd -ms /bin/bash ${user} && \
 USER ${user}
 RUN sudo apt-get update && \https://github.com/husarion/rosbot-docker
     sudo apt-get install --no-install-recommends -y \
-    gdb clang clang-format cppcheck bash-completion python3-pip curl && \
+    gdb clang clang-format cppcheck bash-completion python3-pip curl gcc-arm-none-eabi && \
     suod python3 -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)" && \
-    sudo ln -s /home/husarion/.platformio/penv/bin/platformio /bin/platformio && \
+    sudo ln -s /home/husarion/.platformio/penv/bin/platformio /bin/pio && \
     sudo pip install -U colcon-common-extensions
