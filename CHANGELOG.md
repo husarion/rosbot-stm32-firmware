@@ -9,7 +9,7 @@ author: [byq77](https://github.com/byq77)
 
 Initial log. Introducing new ROSbot firmware written using Mbed OS framework.
 
-### Added 
+### Added
   - VL53L0X sensors support
   - backward compatible ROS interface
   - battery voltage measurement
@@ -41,7 +41,7 @@ author: [byq77](https://github.com/byq77)
 
 ### Fixed
  - fixed odometry for 4-wheeled robot
-  
+
 ### Changed
 - VL53L0X i2c interface frequency set at 400kHz
 - BATTERY LOW indication set at 10.8V
@@ -52,7 +52,7 @@ author: [byq77](https://github.com/byq77)
 ### Added
   - new command:
     * `RIMU` - RESET IMU
-    * `EWCH` - ENABLE SPEED WATCHDOG 
+    * `EWCH` - ENABLE SPEED WATCHDOG
   - speed watchdog (by default enabled), that sets speed to 0 if there is no speed update of `/cmd_vel` for 1s
   - support for EKF
 
@@ -76,7 +76,7 @@ author: [byq77](https://github.com/byq77)
 author: [byq77](https://github.com/byq77)
 
 ### Changed
-  - Improved DDR8848 driver implementation for CORE2. Motors' pwm frequency is now set to 21kHz with 1000 steps resolution. 
+  - Improved DDR8848 driver implementation for CORE2. Motors' pwm frequency is now set to 21kHz with 1000 steps resolution.
   - changed symbols C and C++ versions (following C11 and C++14 support in Mbed 5.13.x)
 
 ## [0.6.0] - 2019-08-14
@@ -89,16 +89,16 @@ author: [byq77](https://github.com/byq77)
 
 ### Changes
   - some code refactoring and updates
-  - `DIAMETER_MODIFICATOR` factor update 
+  - `DIAMETER_MODIFICATOR` factor update
 
 ## [0.7.0] - 2019-08-23
 author: [byq77](https://github.com/byq77)
 
-### Added 
+### Added
   - `AnimationManager` class to control ws2812b's signalization
 
 ### Changed
-  - Better rosserial interface for ws2812b signalization, now you can instantly change the animation and the color. 
+  - Better rosserial interface for ws2812b signalization, now you can instantly change the animation and the color.
 
 ## [0.7.1] - 2019-08-27
 author: [byq77](https://github.com/byq77)
@@ -121,7 +121,7 @@ author: [byq77](https://github.com/byq77)
   - distance sensors enabled by default
   - mbed version changed to `5.14.1`
 
-### Added  
+### Added
   - firmware version is now printed as ros log
 
 ### Fixed
@@ -155,7 +155,7 @@ author: [byq77](https://github.com/byq77)
 author: [byq77](https://github.com/byq77)
 
 ### Fixed
-  - USART6 pins configuration. 
+  - USART6 pins configuration.
 
 ## [0.10.0] - 2020-12-20
 author: [byq77](https://github.com/byq77)
@@ -180,9 +180,9 @@ author: [byq77](https://github.com/byq77)
 author: [byq77](https://github.com/byq77)
 
 ### Fixed
-  - MultiDistanceSensor implementation improved (support of new sensors hardware). 
+  - MultiDistanceSensor implementation improved (support of new sensors hardware).
 
-### Changed  
+### Changed
   - It is possible now to initialize less than 4 proximity sensors, but the error message will be printed.
 
 ## [0.11.0] - 2020-05-19
@@ -198,7 +198,7 @@ author: [byq77](https://github.com/byq77)
 
 ### Changed
   - Updated rosserial-mbed implementation (BufferedSerial lib changed to UARTSerial).
-  - `/pose` and `/velocity` publication frequency increased to ~ 20Hz. 
+  - `/pose` and `/velocity` publication frequency increased to ~ 20Hz.
 
 ## [0.13.0] - 2020-06-30
 author: [byq77](https://github.com/byq77)
@@ -237,10 +237,10 @@ author: [byq77](https://github.com/byq77)
   - fixed bug with MPU9250 initialization (both sensors support)
 
 ## [0.14.3] - 2021-02-04
-  - mecanum kinematics 
+  - mecanum kinematics
   - service for change kinematics (DIFF/MEC)
   - changed baud to "525000" for both Rosbot and Rosbot PRO
-  - BUG found: resetting odometry not working 
+  - BUG found: resetting odometry not working
 
 ## [0.14.4] - 2021-05-10
 
@@ -252,7 +252,7 @@ author: [byq77](https://github.com/byq77)
   - fixed the bug in the odometry
   - reverted odometry params
 
-## [0.14.5] 
+## [0.14.5]
 
 TODO: add changes
 
@@ -272,4 +272,14 @@ TODO: add changes
 ## [0.16.1] - 2022-06-17
 
 ### Fixed
-- add JOINT_STATES_ENABLE flag 
+- add JOINT_STATES_ENABLE flag
+
+## [0.1.0-ros2] - 2022-10-16
+
+### Changed
+- Changed communication interface to [Micro-ROS](https://micro.ros.org/).
+- Created compatibility with [rosbot_hardware_interfaces](https://github.com/husarion/rosbot_hardware_interfaces).
+- Added communication bilinking LEDs.
+
+### Fixed
+- Supported communitaion with ROS2 `humble` version.
