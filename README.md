@@ -99,7 +99,7 @@ You will find `firmware.bin` in `./pio/build/core2`.
 To start [Micro-ROS](https://micro.ros.org/) communication run:
 
 ```bash
-docker run -it --rm -v /dev:/dev -v /dev/shm:/dev/shm --privileged --net=host microros/micro-ros-agent:$ROS_DISTRO serial -D <SBC_port_name>  serial -b 576000
+docker run -it --rm -v /dev:/dev -v /dev/shm:/dev/shm --privileged --net=host microros/micro-ros-agent:humble serial -D <SBC_port_name>  serial -b 576000
 ```
 
 `<SBC_port_name>`:
