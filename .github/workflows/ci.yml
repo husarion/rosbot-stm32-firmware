@@ -36,9 +36,9 @@ jobs:
           submodules: recursive
       
       - name: Installing platformio
-        run: pip3 install -U platformio
+        run: pip3 install -U platformio==6.1.6
 
-      - name: Build current project using platformio==5.2.4 
+      - name: Build current project using platformio 6.1.6 
         run: |
           pio lib install
           pio run
