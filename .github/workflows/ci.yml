@@ -17,7 +17,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Prepare arguments workflow_dispatch
         if: ${{ github.event_name == 'workflow_dispatch'}}
@@ -38,7 +38,7 @@ jobs:
       - name: Installing platformio
         run: pip3 install -U platformio
 
-      - name: Build current project using platformio 
+      - name: Build current project using platformio==5.2.4 
         run: |
           pio lib install
           pio run
