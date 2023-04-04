@@ -9,7 +9,7 @@ ______  _____  _____  _             _           __
 | |\ \ \ \_/ //\__/ /| |_) || (_) || |_       | |   \ V  V / 
 \_| \_| \___/ \____/ |_.__/  \___/  \__|      |_|    \_/\_/  
 ```                                                    
-**Firmware version:** `0.16.0`
+**Firmware version:** `0.16.2`
 
 ## Prerequisites
 You need to install following tools:
@@ -408,3 +408,4 @@ Documentation:
 * https://github.com/ARMmbed/mbed-os/tree/mbed-os-5.15.6/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F407xG
 * https://docs.platformio.org/en/latest/frameworks/mbed.html
 * https://docs.platformio.org/en/latest/platforms/creating_board.html
+* https://stackoverflow.com/questions/72032032/importerror-cannot-import-name-iterable-from-collections-in-python
