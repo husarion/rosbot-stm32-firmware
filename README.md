@@ -400,7 +400,6 @@ Documentation:
 * [MBED OS Documentation](https://os.mbed.com/docs/v5.14/)
 * [MBED OS API Doxygen](https://os.mbed.com/docs/v5.14/mbed-os-api-doxy/modules.html)
 
-
 ## Important dev links (mbed + platformio)
 * https://github.com/platformio/platform-ststm32/tree/develop/examples/mbed-legacy-examples/mbed-rtos
 * https://github.com/platformio/platform-ststm32/blob/develop/boards/olimex_e407.json
@@ -408,4 +407,18 @@ Documentation:
 * https://github.com/ARMmbed/mbed-os/tree/mbed-os-5.15.6/targets/TARGET_STM/TARGET_STM32F4/TARGET_STM32F407xG
 * https://docs.platformio.org/en/latest/frameworks/mbed.html
 * https://docs.platformio.org/en/latest/platforms/creating_board.html
+
+## Python 3.10.x trooubleshoot
 * https://stackoverflow.com/questions/72032032/importerror-cannot-import-name-iterable-from-collections-in-python
+
+Required changes in pio files:
+`File ".platformio/packages/framework-mbed/platformio/package_deps/py3/past/types/oldstr.py", line 5:`
+```diff
+> from collections.abc import Iterable
+< from collections import Iterable
+```
+`File ".platformio/packages/framework-mbed/platformio/package_deps/py3/past/builtins/misc.py", line 4:`
+```diff
+> from collections.abc import Mapping
+< from collections import Mapping
+```
