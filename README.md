@@ -19,19 +19,6 @@ You need to install following tools:
 * [Microsoft C/C++ extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) (`ms-vscode.cpptools`)
 * [PlatformIO IDE](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) (`platformio.platformio-ide`)
 
-
-## Loading dependencies
-Unfortunately, PlatformIO has a [bug](https://github.com/platformio/platform-ststm32/issues/491) that impacts libraries configuration. We use git submodules instead.
-
-> **Git submodules**
-> https://git-scm.com/book/en/v2/Git-Tools-Submodules
-
-To import dependencies, in project's root directory run command:
-
-```bash
-git submodule update --init --recursive
-```
-
 ## Speed up build process
 https://docs.platformio.org/en/latest/frameworks/mbed.html#ignoring-particular-components
 
