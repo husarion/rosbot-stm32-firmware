@@ -273,3 +273,9 @@ TODO: add changes
 
 ### Fixed
 - add JOINT_STATES_ENABLE flag 
+
+## [0.16.2] - 2023-04-12
+
+### Fixed
+- repo dependencies
+- troubleshooting for Python 3.10.x and pio build for Mbed OS 5.15

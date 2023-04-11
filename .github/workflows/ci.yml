@@ -33,8 +33,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ env.rosbot_stm32_firmware_ref }}
-          submodules: recursive
-      
+          
       - name: Installing platformio
         run: pip3 install -U platformio==6.1.6
 
