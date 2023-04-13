@@ -29,6 +29,7 @@ jobs:
       artifact_name: ${{ steps.prepare-firmware-files.outputs.artifact_name }}
       create_release: ${{ env.create_release }}
       release_name: ${{ env.release_name }}
+      tag_name: ${{ env.tag_name }}
     steps:
       - name: Prepare arguments workflow_dispatch
         if: ${{ github.event_name == 'workflow_dispatch' }}
@@ -43,6 +44,7 @@ jobs:
           echo "rosbot_stm32_firmware_ref=${{ github.event.client_payload.release_version }}" >> $GITHUB_ENV        
           echo "create_release=yes" >> $GITHUB_ENV
           echo "release_name='Relese v${{ github.event.client_payload.release_version }}'" >> $GITHUB_ENV
+          echo "tag_name=${{ github.event.client_payload.release_version }}" >> $GITHUB_ENV
 
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -69,6 +71,13 @@ jobs:
           cp ${{ github.workspace }}/LICENSE out/LICENSE
           cp ${{ github.workspace }}/README.md out/README.md
 
+      - name: Prepare mock tag
+        if: ${{ github.event_name == 'workflow_dispatch' && env.create_release == 'yes' }}
+        run: |
+          echo "tag_name=mock-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          git tag ${{ env.tag_name }}
+          git push --tags
+
       - name: Upload firmware files
         uses: actions/upload-artifact@v3
         with:
@@ -88,6 +97,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ needs.build.outputs.tag_name }}
           generate_release_notes: "true"
           token: ${{ secrets.GH_PAT }}
           draft: "false"
