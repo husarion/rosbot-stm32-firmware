@@ -278,4 +278,6 @@ TODO: add changes
 
 ### Fixed
 - repo dependencies
-- troubleshooting for Python 3.10.x and pio build for Mbed OS 5.15
+- Done some build troubleshooting for Python 3.10.x
+- updated workflows
+- fixed version print at startup
