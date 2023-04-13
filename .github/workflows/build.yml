@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "rosbot_stm32_firmware_ref=${{ github.event.client_payload.release_version }}" >> $GITHUB_ENV        
           echo "create_release=yes" >> $GITHUB_ENV
-          echo "release_name='Relese v${{ github.event.client_payload.release_version }}'" >> $GITHUB_ENV
+          echo "release_name=Release v${{ github.event.client_payload.release_version }}" >> $GITHUB_ENV
           echo "tag_name=${{ github.event.client_payload.release_version }}" >> $GITHUB_ENV
 
       - name: Checkout repository
@@ -93,19 +93,20 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ needs.build.outputs.artifact_name }}
+          path: release_files
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ needs.build.outputs.tag_name }}
-          generate_release_notes: "false"
+          generate_release_notes: "true"
           token: ${{ secrets.GH_PAT }}
           draft: "false"
           name: ${{ needs.build.outputs.release_name }}
           files: |
-            out/firmware_diff.bin
-            out/firmware_diff.hex
-            out/firmware_mec.bin
-            out/firmware_mec.hex
-            out/LICENSE
-            out/README.md
+            release_files/firmware_diff.bin
+            release_files/firmware_diff.hex
+            release_files/firmware_mec.bin
+            release_files/firmware_mec.hex
+            release_files/LICENSE
+            release_files/README.md
