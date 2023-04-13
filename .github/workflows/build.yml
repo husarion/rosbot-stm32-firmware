@@ -60,7 +60,7 @@ jobs:
       - name: Prepare firmware files
         id: prepare-firmware-files
         run: |
-          echo "artifact_name=firmware_$(git rev-parse --short HEAD)" > $GITHUB_OUTPUT
+          echo "artifact_name=firmware_$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           mkdir out
           cp ${{ github.workspace }}/.pio/build/core2_diff/firmware.bin out/firmware_diff.bin
           cp ${{ github.workspace }}/.pio/build/core2_diff/firmware.hex out/firmware_diff.hex
