@@ -1,0 +1,65 @@
+name: Bump version and dispatch release
+on:
+  pull_request:
+    branches: main
+    types: [closed]
+
+jobs:
+  get-bump:
+    name: Get version bump
+    runs-on: ubuntu-latest
+    outputs:
+      bump: ${{ steps.get-version-bump.outputs.bump }}
+    steps:
+      - name: Get version bump
+        if: github.event.pull_request.merged == true
+        id: get-version-bump
+        uses: husarion-ci/action-get-version-bump@latest
+
+  bump-version:
+    name: Bump version
+    runs-on: ubuntu-latest
+    needs: get-bump
+    if: needs.get-bump.outputs.bump != 'none'
+    outputs:
+      new_version: ${{ steps.bump-semver.outputs.new_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        id: get-latest-tag
+        with:
+          with_initial_version: false
+          semver_only: true
+
+      - name: Bump version
+        uses: actions-ecosystem/action-bump-semver@v1
+        id: bump-semver
+        with:
+          current_version: ${{ steps.get-latest-tag.outputs.tag }}
+          level: ${{ needs.get-bump.outputs.bump }}
+
+      - name: Create tag
+        run: git tag ${{ steps.bump-semver.outputs.new_version }}
+
+      - name: Publish tags
+        run: git push --tags
+
+  trigger-release:
+    name: Trigger firmware build and release
+    needs: bump-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.GH_PAT }}
+          event-type: trigger_build_and_release
+          client-payload: | 
+                {
+                  "release_version": "${{ needs.bump-version.outputs.new_version}}"
+                }
