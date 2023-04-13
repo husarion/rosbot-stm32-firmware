@@ -109,4 +109,4 @@ jobs:
             release_files/firmware_mec.bin
             release_files/firmware_mec.hex
             release_files/LICENSE
-            release_files/README.md
+            release_files/CHANGELOG.md
