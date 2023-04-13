@@ -26,9 +26,9 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     outputs:
-      artifact_name: $ {{ steps.prepare-firmware-files.outputs.artifact_name }}
-      create_release: ${{ github.env.create_release }}
-      release_name: ${{ github.env.release_name }}
+      artifact_name: ${{ steps.prepare-firmware-files.outputs.artifact_name }}
+      create_release: ${{ env.create_release }}
+      release_name: ${{ env.release_name }}
     steps:
       - name: Prepare arguments workflow_dispatch
         if: ${{ github.event_name == 'workflow_dispatch' }}
@@ -47,7 +47,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.env.FIRMWARE_REF }}
+          ref: ${{ env.rosbot_stm32_firmware_ref }}
 
       - name: Installing platformio
         run: pip3 install -U platformio==6.1.6
