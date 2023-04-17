@@ -6,7 +6,7 @@ on:
         description: "The branch that will be used in the build"
         required: true
         default: "main"
-      create_release: 
+      create_release:
         description: "Do you want to create release"
         required: false
         type: choice
@@ -14,19 +14,23 @@ on:
           - "yes"
           - "no"
         default: "no"
-      release_name: 
+      release_name:
         description: "Custom release name"
         required: false
         default: "Mock release"
+      release_tag:
+        description: "Custom release tag"
+        required: false
+        default: "mock"
 
-  repository_dispatch: 
+  repository_dispatch:
     types: ["trigger_build_and_release"]
 
 jobs:
   build:
     runs-on: ubuntu-20.04
     outputs:
-      artifact_name: ${{ steps.prepare-firmware-files.outputs.artifact_name }}
+      artifact_name: ${{ env.artifact_name }}
       create_release: ${{ env.create_release }}
       release_name: ${{ env.release_name }}
       tag_name: ${{ env.tag_name }}
@@ -37,7 +41,8 @@ jobs:
           echo "rosbot_stm32_firmware_ref=${{ github.event.inputs.branch }}" >> $GITHUB_ENV
           echo "create_release=${{ github.event.inputs.create_release }}" >> $GITHUB_ENV
           echo "release_name=${{ github.event.inputs.release_name }}" >> $GITHUB_ENV
-          
+          echo "tag_name=${{ github.event.inputs.release_tag }}" >> $GITHUB_ENV
+
       - name: Prepare arguments repository_dispatch
         if: ${{ github.event.action == 'trigger_build_and_release' }}
         run: |
@@ -62,26 +67,25 @@ jobs:
       - name: Prepare firmware files
         id: prepare-firmware-files
         run: |
-          echo "artifact_name=firmware_$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "artifact_name=firmware_$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           mkdir out
           cp ${{ github.workspace }}/.pio/build/core2_diff/firmware.bin out/firmware_diff.bin
           cp ${{ github.workspace }}/.pio/build/core2_diff/firmware.hex out/firmware_diff.hex
           cp ${{ github.workspace }}/.pio/build/core2_mec/firmware.bin out/firmware_mec.bin
           cp ${{ github.workspace }}/.pio/build/core2_mec/firmware.hex out/firmware_mec.hex
           cp ${{ github.workspace }}/LICENSE out/LICENSE
-          cp ${{ github.workspace }}/README.md out/README.md
+          cp ${{ github.workspace }}/CHANGELOG.md out/CHANGELOG.md
 
-      - name: Prepare mock tag
+      - name: Create custom tag
         if: ${{ github.event_name == 'workflow_dispatch' && env.create_release == 'yes' }}
         run: |
-          echo "tag_name=mock-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
           git tag ${{ env.tag_name }}
           git push --tags
 
       - name: Upload firmware files
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ steps.prepare-firmware-files.outputs.artifact_name }}
+          name: ${{ env.artifact_name }}
           path: out/*
 
   release:
